@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Presentación | Dr. Walter Valdemar Poroj Sacor</title>
+  <style>
+    :root{
+      --azul:#0b3b75;
+      --azul-2:#164f9b;
+      --celeste:#dcecff;
+      --dorado:#d9a320;
+      --gris:#f4f7fb;
+      --texto:#1b2430;
+      --blanco:#ffffff;
+      --sombra:0 18px 40px rgba(11,59,117,.18);
+      --radio:24px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      color:var(--texto);
+      background:linear-gradient(180deg,#eef5ff 0%, #f8fbff 45%, #ffffff 100%);
+    }
+
+    .wrap{
+      width:min(1180px, 92%);
+      margin:0 auto;
+    }
+
+    .hero-bg{
+      position:relative;
+      overflow:hidden;
+      padding:44px 0 56px;
+      background:
+        radial-gradient(circle at top left, rgba(217,163,32,.20), transparent 22%),
+        radial-gradient(circle at right, rgba(22,79,155,.22), transparent 26%),
+        linear-gradient(135deg, #0b3b75 0%, #164f9b 55%, #1f64c2 100%);
+    }
+
+    .hero-bg::before,
+    .hero-bg::after{
+      content:"";
+      position:absolute;
+      border-radius:999px;
+      filter:blur(6px);
+      opacity:.18;
+    }
+
+    .hero-bg::before{
+      width:260px;
+      height:260px;
+      top:-80px;
+      right:6%;
+      background:#fff;
+    }
+
+    .hero-bg::after{
+      width:180px;
+      height:180px;
+      bottom:-70px;
+      left:4%;
+      background:#d9a320;
+    }
+
+    .badge{
+      display:inline-block;
+      padding:10px 18px;
+      border:1px solid rgba(255,255,255,.25);
+      color:#fff;
+      background:rgba(255,255,255,.08);
+      backdrop-filter:blur(8px);
+      border-radius:999px;
+      font-size:.95rem;
+      letter-spacing:.4px;
+      margin-bottom:18px;
+    }
+
+    .hero-card{
+      position:relative;
+      z-index:1;
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap:34px;
+      align-items:center;
+      padding:28px;
+      background:rgba(255,255,255,.96);
+      border-radius:32px;
+      box-shadow:var(--sombra);
+    }
+
+    .photo-box{
+      position:relative;
+      background:linear-gradient(180deg, #f1f7ff 0%, #dcebff 100%);
+      border-radius:28px;
+      padding:16px;
+      box-shadow:inset 0 0 0 1px rgba(11,59,117,.08);
+    }
+
+    .photo-box img{
+      width:100%;
+      display:block;
+      border-radius:22px;
+      object-fit:cover;
+      box-shadow:0 14px 28px rgba(0,0,0,.18);
+    }
+
+    .photo-label{
+      position:absolute;
+      left:28px;
+      bottom:28px;
+      background:rgba(11,59,117,.90);
+      color:#fff;
+      padding:10px 14px;
+      border-radius:14px;
+      font-size:.92rem;
+      box-shadow:0 8px 20px rgba(11,59,117,.25);
+    }
+
+    h1{
+      margin:0 0 10px;
+      font-size:clamp(2rem, 4vw, 3.5rem);
+      line-height:1.06;
+      color:var(--azul);
+    }
+
+    .subtitle{
+      font-size:1.18rem;
+      color:#48617c;
+      margin:0 0 18px;
+      font-weight:700;
+    }
+
+    .lead{
+      font-size:1.08rem;
+      line-height:1.8;
+      margin:0 0 22px;
+    }
+
+    .highlight{
+      color:var(--azul);
+      font-weight:700;
+    }
+
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin:18px 0 0;
+    }
+
+    .pill{
+      padding:12px 16px;
+      border-radius:999px;
+      background:#eef5ff;
+      color:var(--azul);
+      font-weight:700;
+      border:1px solid #d4e5ff;
+      font-size:.96rem;
+    }
+
+    .clar-menu{
+      position:relative;
+    }
+
+    .clar-toggle{
+      cursor:pointer;
+      appearance:none;
+      font:inherit;
+      padding:12px 16px;
+      border-radius:999px;
+      background:#eef5ff;
+      color:var(--azul);
+      font-weight:700;
+      border:1px solid #d4e5ff;
+      font-size:.96rem;
+      transition:all .2s ease;
+    }
+
+    .clar-toggle:hover{
+      background:#dfeeff;
+    }
+
+    .clar-dropdown{
+      position:absolute;
+      top:calc(100% + 10px);
+      left:0;
+      min-width:260px;
+      background:#fff;
+      border:1px solid rgba(11,59,117,.10);
+      border-radius:18px;
+      box-shadow:0 18px 34px rgba(11,59,117,.16);
+      padding:10px;
+      display:none;
+      z-index:20;
+    }
+
+    .clar-dropdown.show{
+      display:block;
+    }
+
+    .clar-dropdown a{
+      display:block;
+      text-decoration:none;
+      color:var(--azul);
+      font-weight:700;
+      padding:12px 14px;
+      border-radius:12px;
+      transition:background .2s ease, transform .2s ease;
+    }
+
+    .clar-dropdown a:hover{
+      background:#eef5ff;
+      transform:translateX(2px);
+    }
+
+    .options-grid{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:20px;
+      margin-top:28px;
+    }
+
+    .option-card{
+      background:#ffffff;
+      border:1px solid rgba(11,59,117,.08);
+      border-radius:24px;
+      padding:24px;
+      box-shadow:0 10px 24px rgba(11,59,117,.08);
+      scroll-margin-top:90px;
+    }
+
+    .option-card span{
+      display:inline-block;
+      margin-bottom:10px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:#eef5ff;
+      color:var(--azul);
+      font-weight:700;
+      font-size:.9rem;
+    }
+
+    .option-card h3{
+      margin:0 0 10px;
+      color:var(--azul);
+      font-size:1.15rem;
+    }
+
+    .option-card p{
+      margin:0 0 16px;
+      color:#3b4c5f;
+      line-height:1.75;
+    }
+
+    .option-link{
+      display:inline-block;
+      text-decoration:none;
+      background:var(--azul);
+      color:#fff;
+      padding:12px 16px;
+      border-radius:14px;
+      font-weight:700;
+      box-shadow:0 10px 20px rgba(11,59,117,.18);
+    }
+
+    section{
+      padding:62px 0;
+    }
+
+    .section-title{
+      font-size:clamp(1.7rem, 3vw, 2.4rem);
+      margin:0 0 12px;
+      color:var(--azul);
+    }
+
+    .section-text{
+      max-width:920px;
+      line-height:1.85;
+      font-size:1.05rem;
+      margin:0;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:22px;
+      margin-top:28px;
+    }
+
+    .card{
+      background:var(--blanco);
+      border-radius:var(--radio);
+      padding:26px;
+      box-shadow:0 12px 28px rgba(11,59,117,.08);
+      border:1px solid rgba(11,59,117,.07);
+    }
+
+    .card h3{
+      margin:0 0 12px;
+      color:var(--azul);
+      font-size:1.12rem;
+    }
+
+    .card p{
+      margin:0;
+      line-height:1.75;
+      color:#3b4c5f;
+    }
+
+    .clar{
+      background:linear-gradient(180deg, #ffffff 0%, #f2f7ff 100%);
+    }
+
+    .clar-box{
+      display:grid;
+      grid-template-columns:1.25fr .95fr;
+      gap:24px;
+      align-items:stretch;
+      margin-top:28px;
+    }
+
+    .feature-panel{
+      background:var(--blanco);
+      border-radius:30px;
+      padding:30px;
+      box-shadow:var(--sombra);
+      border:1px solid rgba(11,59,117,.08);
+    }
+
+    .feature-panel ul{
+      margin:18px 0 0;
+      padding-left:20px;
+      line-height:1.9;
+    }
+
+    .quote{
+      background:linear-gradient(135deg, var(--azul) 0%, var(--azul-2) 100%);
+      color:#fff;
+      border-radius:30px;
+      padding:34px 30px;
+      box-shadow:var(--sombra);
+    }
+
+    .quote p{
+      margin:0;
+      line-height:1.9;
+      font-size:1.05rem;
+    }
+
+    .quote strong{
+      display:block;
+      margin-top:18px;
+      color:#ffd873;
+      font-size:1rem;
+    }
+
+    .footer{
+      padding:26px 0 42px;
+      text-align:center;
+      color:#5a6b7d;
+      font-size:.96rem;
+    }
+
+    .divider{
+      width:92px;
+      height:5px;
+      border-radius:999px;
+      background:linear-gradient(90deg, var(--dorado), #ffd873);
+      margin:18px 0 22px;
+    }
+
+    @media (max-width: 980px){
+      .hero-card,
+      .clar-box{
+        grid-template-columns:1fr;
+      }
+
+      .grid,
+      .options-grid{
+        grid-template-columns:1fr;
+      }
+
+      .photo-box{
+        max-width:520px;
+        margin:0 auto;
+      }
+    }
+
+    @media (max-width: 640px){
+      .hero-bg{padding:26px 0 34px}
+      .hero-card{padding:18px}
+      .feature-panel,.quote,.card,.option-card{padding:22px}
+      .pill-row{gap:10px}
+      .pill,.clar-toggle{width:100%; text-align:center}
+      .clar-menu{width:100%}
+      .clar-dropdown{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <header class="hero-bg">
+    <div class="wrap">
+      <div class="badge">División de Ciencias Económicas</div>
+      <div class="hero-card">
+        <div class="photo-box">
+          <img alt="Dr. Walter Valdemar Poroj Sacor" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAA+AyADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD8OLmyNra25RlyhIO4fT2r3L4VeKbDwL4w0rX5lFu01+bv3SPlYlH5qyn8c12X7SfwL0z4f/FU+Jb8G0gu8xM/AJ3qfQj6H0r6Z8SeJ31nSbJr6CCTz5AqLKOMleT82evtX57iM2p4l4HhXMa0faVcPVVpaJte5+W8ScSZRkWQYfL1RoTVk0tJr7j/2Q==" />
+          <div class="photo-label">Presentación institucional</div>
+        </div>
+        <div>
+          <h1>Dr. Walter Valdemar<br>Poroj Sacor</h1>
+          <p class="subtitle">Director de la División de Ciencias Económicas</p>
+          <p class="lead">
+            Con distinguida trayectoria académica y compromiso institucional, el <span class="highlight">Dr. Walter Valdemar Poroj Sacor</span>
+            lidera la División de Ciencias Económicas con una visión orientada al fortalecimiento de la calidad educativa,
+            la innovación académica y la consolidación de procesos de mejora continua.
+          </p>
+          <p class="lead">
+            En esta presentación institucional se destaca su papel en la <span class="highlight">impulsión y presentación del proyecto CLAR</span>,
+            orientado al <span class="highlight">Plan Fin de Semana</span> y a la <span class="highlight">PECED</span>, como una iniciativa estratégica para
+            fortalecer la planificación académica, la organización del trabajo docente y la articulación de los procesos formativos.
+          </p>
+          <div class="pill-row">
+            <div class="pill">Liderazgo académico</div>
+            <div class="pill">Innovación institucional</div>
+            <div class="clar-menu">
+              <button class="clar-toggle" id="clarToggle" type="button">Proyecto CLAR</button>
+              <div class="clar-dropdown" id="clarDropdown">
+                <a href="https://jrchavezmejia.github.io/CREDITOS-CLAR-CCEE-CUNOC-USAC/" target="_blank" rel="noopener noreferrer">1. Plan Diario</a>
+                <a href="#fin-semana">2. Fin de Semana</a>
+                <a href="#peced">3. PECED</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section>
+    <div class="wrap">
+      <h2 class="section-title">Mensaje de presentación</h2>
+      <div class="divider"></div>
+      <p class="section-text">
+        La Dirección de la División de Ciencias Económicas reafirma su compromiso con la excelencia, la actualización permanente
+        y la implementación de propuestas que aporten valor al desarrollo académico. Bajo esta perspectiva, el Dr. Walter Valdemar Poroj Sacor
+        presenta el proyecto CLAR como una propuesta de orden estratégico que contribuye a estructurar, visibilizar y fortalecer la dinámica
+        formativa del Plan Fin de Semana y la PECED, favoreciendo una gestión académica más clara, organizada y orientada a resultados.
+      </p>
+
+      <div class="grid">
+        <article class="card">
+          <h3>Dirección con visión institucional</h3>
+          <p>
+            La gestión del Dr. Walter Valdemar Poroj Sacor se caracteriza por impulsar acciones con enfoque académico, sentido de responsabilidad institucional
+            y apertura a procesos de innovación que fortalezcan la formación superior.
+          </p>
+        </article>
+        <article class="card">
+          <h3>Compromiso con la mejora continua</h3>
+          <p>
+            La promoción de herramientas y proyectos estratégicos permite consolidar mecanismos de planificación, seguimiento y organización académica,
+            en beneficio de estudiantes, docentes y autoridades.
+          </p>
+        </article>
+        <article class="card">
+          <h3>Proyección para modalidades específicas</h3>
+          <p>
+            La presentación del proyecto CLAR para el Plan Fin de Semana y la PECED refleja una atención directa a las necesidades de estas modalidades,
+            reconociendo su importancia dentro de la estructura académica de la División.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="clar">
+    <div class="wrap">
+      <h2 class="section-title">Proyecto CLAR</h2>
+      <div class="divider"></div>
+      <p class="section-text">
+        El proyecto CLAR se presenta como una iniciativa de fortalecimiento académico que busca aportar claridad, orden y coherencia a los procesos de planificación,
+        articulación y proyección educativa. Su presentación para el Plan Fin de Semana y la PECED constituye un paso importante para afianzar una cultura de trabajo
+        académico más estructurada, pertinente y alineada con las exigencias contemporáneas de la educación superior.
+      </p>
+
+      <div class="options-grid">
+        <article class="option-card" id="plan-diario">
+          <span>Opción 1</span>
+          <h3>Plan Diario</h3>
+          <p>
+            Acceso directo a la herramienta vinculada al componente CLAR para la planificación y organización académica del plan diario.
+          </p>
+          <a class="option-link" href="https://jrchavezmejia.github.io/CREDITOS-CLAR-CCEE-CUNOC-USAC/" target="_blank" rel="noopener noreferrer">Abrir Plan Diario</a>
+        </article>
+
+        <article class="option-card" id="fin-semana">
+          <span>Opción 2</span>
+          <h3>Fin de Semana</h3>
+          <p>
+            Espacio destinado a la presentación y proyección del proyecto CLAR para la modalidad Fin de Semana dentro de la División de Ciencias Económicas.
+          </p>
+        </article>
+
+        <article class="option-card" id="peced">
+          <span>Opción 3</span>
+          <h3>PECED</h3>
+          <p>
+            Apartado orientado a la presentación del proyecto CLAR en la PECED, resaltando su alcance académico y su contribución a la organización institucional.
+          </p>
+        </article>
+      </div>
+
+      <div class="clar-box">
+        <div class="feature-panel">
+          <h3 style="margin:0; color:var(--azul); font-size:1.35rem;">Ejes de la presentación</h3>
+          <ul>
+            <li>Reconocimiento del papel estratégico del proyecto CLAR en la organización académica.</li>
+            <li>Impulso de acciones orientadas a fortalecer el Plan Fin de Semana y la PECED.</li>
+            <li>Proyección de una gestión educativa más ordenada, clara y funcional.</li>
+            <li>Apoyo institucional a procesos de innovación y mejora continua.</li>
+            <li>Fortalecimiento del trabajo académico con visión de calidad y pertinencia.</li>
+          </ul>
+        </div>
+
+        <aside class="quote">
+          <p>
+            “La consolidación de propuestas académicas con visión estratégica permite avanzar hacia una formación más organizada,
+            pertinente y comprometida con la calidad educativa. En ese marco, la presentación del proyecto CLAR representa una oportunidad
+            valiosa para fortalecer el trabajo del Plan Fin de Semana y la PECED dentro de la División de Ciencias Económicas.”
+          </p>
+          <strong>Dr. Walter Valdemar Poroj Sacor</strong>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2 class="section-title">Proyección institucional</h2>
+      <div class="divider"></div>
+      <p class="section-text">
+        Esta página de presentación resalta la figura del Dr. Walter Valdemar Poroj Sacor como autoridad académica comprometida con la consolidación de proyectos que
+        contribuyen al fortalecimiento de la División de Ciencias Económicas. La presentación del proyecto CLAR para el Plan Fin de Semana y la PECED evidencia una
+        dirección activa, propositiva y enfocada en la construcción de mejores condiciones para el desarrollo de la comunidad universitaria.
+      </p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    División de Ciencias Económicas · Presentación institucional del Director y del proyecto CLAR
+  </footer>
+  <script>
+    const clarToggle = document.getElementById('clarToggle');
+    const clarDropdown = document.getElementById('clarDropdown');
+
+    if (clarToggle && clarDropdown) {
+      clarToggle.addEventListener('click', function (event) {
+        event.stopPropagation();
+        clarDropdown.classList.toggle('show');
+      });
+
+      document.addEventListener('click', function (event) {
+        if (!clarDropdown.contains(event.target) && event.target !== clarToggle) {
+          clarDropdown.classList.remove('show');
+        }
+      });
+    }
+  </script>
+</body>
+</html>
