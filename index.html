@@ -1,2228 +1,1121 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>INSTRUMENTO CLAR – Planificación Semanal</title>
-<meta name="color-scheme" content="light dark">
-<style>
-  :root{
-    --bg:#ffffff; --fg:#0b1220; --muted:#475569; --brand:#16a34a; --brand-2:#0ea5e9;
-    --surface:#f9fafb; --surface-2:#eafff3; --surface-3:#d1fae5; --border:#cbd5e1; --border-2:#94a3b8;
-    --warn:#ef4444; --focus:#7c3aed; --shadow:0 2px 10px rgba(0,0,0,.06);
-  }
-  @media (prefers-color-scheme: dark){
-    :root{ --bg:#0b1220; --fg:#e5e7eb; --muted:#94a3b8; --surface:#0f172a; --surface-2:#0b2a18; --surface-3:#0f3d24; --border:#334155; --border-2:#475569; }
-  }
-  *{ box-sizing:border-box }
-  html,body{ height:100% }
-  body{ margin:0; font-family: Arial, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; background:var(--bg); color:var(--fg); font-size:10pt }
-  .container{ max-width:1200px; margin:0 auto; padding:20px }
-  h1{ font-size:12pt; font-weight:800; margin:0 }
-  .page-header{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px }
-
-  /* Barra de configuración */
-  .setup-bar{ position:sticky; top:0; z-index:5; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; box-shadow:var(--shadow); margin-bottom:12px }
-  .setup-bar label{ font-weight:600 }
-  .setup-bar input[type="number"], .setup-bar input[type="date"]{ padding:6px 10px; border:1px solid var(--border-2); border-radius:8px; font-size:10pt; background:var(--bg); color:var(--fg) }
-  .btn{ background:var(--brand-2); color:#fff; border:none; border-radius:10px; padding:8px 12px; font-weight:700; cursor:pointer }
-  .btn:hover{ filter:brightness(.95) }
-  .btn.success{ background:#10b981 }
-  .btn.warn{ background:var(--warn) }
-  .btn.ghost{ background:transparent; border:1px solid var(--border-2); color:var(--fg) }
-  .btn-sm{ font-size:9pt; padding:6px 10px; border-radius:8px; cursor:pointer; border:1px solid var(--border-2); background:var(--surface); color:var(--fg) }
-
-  /* Gestión de cursos */
-  .course-manager{ background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:12px }
-  .course-manager h3{ margin:0 0 8px 0; font-size:11pt }
-  .course-actions{ display:flex; gap:8px; flex-wrap:wrap; align-items:center }
-  .course-select{ flex:1; min-width:200px; padding:6px 8px; border:1px solid var(--border-2); border-radius:8px; background:var(--bg) }
-
-  /* Encabezado maestro */
-  .master-header{ background:var(--surface-3); padding:14px; border-radius:12px; margin:12px 0; border:1px solid var(--brand); display:block }
-  .header-top{ display:grid; grid-template-columns: 1fr; gap:16px; align-items:start }
-  .top-left{ display:grid; grid-template-columns: 1fr; gap:12px }
-  .header-logos{ display: none; } /* OCULTAR SECCIÓN DE LOGOS COMPLETAMENTE */
-  .header-bottom{ margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:12px }
-  .row{ display:flex; flex-wrap:wrap; gap:12px; align-items:center }
-  .row.span-2{ grid-column:1 / -1 }
-  @media (max-width: 860px){ .header-top{ grid-template-columns:1fr } .header-bottom{ grid-template-columns:1fr } }
-  .master-header label{ font-weight:700; min-width:140px; margin-right:4px; color:var(--fg) }
-  .master-header input, .master-header select, .master-header textarea{ flex:1; padding:6px 8px; border:1px solid var(--brand); border-radius:8px; background:var(--surface-2); font-size:10pt; resize:none; overflow-y:hidden; line-height:1.2; white-space:pre-wrap; word-break:break-word; color:var(--fg); font-weight:normal }
-  .master-header textarea[readonly]{ background:var(--surface-2); color:var(--fg); cursor:not-allowed }
-  .master-header .field-value{ font-weight:normal !important }
-
-  /* Campos de solo lectura para PDF */
-  .print-field{ 
-    padding:6px 8px; 
-    border:1px solid var(--brand); 
-    border-radius:8px; 
-    background:var(--surface-2); 
-    font-size:10pt; 
-    line-height:1.2; 
-    white-space:pre-wrap; 
-    word-break:break-word; 
-    color:var(--fg); 
-    font-weight:normal;
-    min-height: 24px;
-  }
-
-  /* Semana y tabla */
-  .week{ margin-bottom:20px; border:1px solid var(--border); border-radius:12px; padding:12px; background:var(--surface); position:relative }
-  .exam-badge{ position:absolute; right:12px; top:-10px; background:#fde68a; border:1px solid #f59e0b; padding:2px 8px; border-radius:999px; font-weight:800; font-size:9pt }
-  .week h2{ font-size:11pt; font-weight:700; margin:0 0 8px }
-  .week-range{ color:var(--muted); font-style:italic; margin-bottom:6px }
-  table{ width:100%; border-collapse:collapse; table-layout:auto }
-  th, td{ border:1px solid var(--border); padding:6px; font-size:10pt; vertical-align:top; text-align:center }
-  th{ background:#f1f5f9; font-weight:600 }
-  th:nth-child(1), td:nth-child(1){ width:1%; white-space:nowrap }
-  th:nth-child(2), td:nth-child(2){ width:30%; white-space:normal; word-break:break-word }
-  th:nth-child(3), td:nth-child(3){ width:40% }
-  th:nth-child(4), td:nth-child(4), th:nth-child(5), td:nth-child(5), th:nth-child(6), td:nth-child(6){ width:120px }
-
-  /* Colores de modalidad */
-  .mod-teo td, .mod-teo{ background:#f7c7cf }
-  .mod-pra td, .mod-pra{ background:#cfe0f7 }
-  .mod-aut td, .mod-aut{ background:#fff5a8 }
-
-  textarea, input[type="number"], input[type="text"], select{ width:100%; box-sizing:border-box; padding:5px; font-size:10pt; border:1px solid #d1d5db; border-radius:8px; background:#fff; min-height:24px; font-weight:normal }
-  textarea{ resize:none; overflow-y:hidden; line-height:1.2; white-space:pre-wrap; word-break:break-word }
-
-  /* CORRECCIÓN: Estilos para campos de solo lectura en semanas para PDF */
-  .week .print-minutos,
-  .week .print-puntos-netos,
-  .week .print-puntos-acumulados {
-    display: none;
-    padding: 4px 6px;
-    border: none;
-    background: transparent;
-    color: #000;
-    font-size: 10pt;
-    width: 100%;
-    text-align: center;
-    font-weight: normal;
-  }
-
-  /* Resumen semanal */
-  .week-summary{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin:8px 0 0; font-size:10pt }
-  .badge{ display:inline-block; padding:3px 8px; border-radius:999px; border:1px solid var(--border-2); background:var(--surface-2) }
-  .badge.warn{ border-color:var(--warn); background:#fee2e2 }
-  .note-muted{ color:var(--muted); font-style:italic }
-
-  /* Evaluación */
-  .eval-wrap{ margin-top:18px }
-  .eval-title{ font-size:11pt; font-weight:800; margin:10px 0 6px }
-  .eval-table{ width:100%; border-collapse:collapse; table-layout:auto }
-  .eval-table th, .eval-table td{ border:1px solid var(--border-2); padding:6px; font-size:10pt }
-  .eval-table th:nth-child(1), .eval-table td:nth-child(1){ text-align:left }
-  .eval-table th:nth-child(2), .eval-table td:nth-child(2){ text-align:right; width:120px }
-  .eval-head{ background:#dbeafe; font-weight:700 }
-  .eval-total td{ font-weight:800 }
-  .over-cap{ background:#fee2e2 !important; color:#7f1d1d !important; font-weight:800; }
-
-  /* Reporte final */
-  .report-wrap{ margin-top:18px }
-  .report-title{ font-size:11pt; font-weight:700; margin:10px 0 6px }
-  .report-table{ width:100%; border-collapse:collapse; table-layout:auto }
-  .report-table th, .report-table td{ border:1px solid var(--border-2); padding:6px; font-size:10pt }
-  .report-table th:nth-child(1), .report-table td:nth-child(1){ width:55%; text-align:left; white-space:normal; word-break:break-word }
-  .report-table th:nth-child(2), .report-table td:nth-child(2),
-  .report-table th:nth-child(3), .report-table td:nth-child(3){ width:15%; text-align:right }
-  .report-head{ background:#a7d7a7; font-weight:700 }
-  .clar-merged{ background:#ff8c00; color:#000; font-weight:800; font-size:18pt; text-align:center; vertical-align:middle }
-  .row-teo{ background:#f7c7cf }
-  .row-pra{ background:#cfe0f7 }
-  .row-aut{ background:#fff5a8 }
-  .row-total td{ font-weight:700 }
-
-  /* Secciones finales */
-  .final-wrap{ margin-top:18px }
-  .final-title{ text-align:center; font-weight:800; font-size:11pt; border:1px solid var(--brand); border-bottom:none; padding:6px 8px; border-radius:10px 10px 0 0; background:var(--surface-3) }
-  .final-body{ border:1px solid var(--brand); padding:8px; border-radius:0 0 10px 10px; background:var(--surface-3) }
-  .final-body textarea{ width:100%; border:none; outline:none; background:var(--surface-2); min-height:90px; font-size:10pt; line-height:1.4; color:var(--fg); font-weight:normal }
-  .final-note{ font-size:9pt; color:var(--muted) }
-
-  /* MEJORA: Sección de firmas de docentes simplificada */
-  .docentes-section { 
-    background: var(--surface-2); 
-    border: 1px solid var(--border); 
-    border-radius: 12px; 
-    padding: 20px; 
-    margin-top: 40px; 
-    box-shadow: var(--shadow); 
-  }
-  .docentes-title { 
-    text-align: center; 
-    font-weight: bold; 
-    color: var(--fg); 
-    margin-bottom: 16px; 
-    font-size: 11pt; 
-  }
-  .docentes-grid { 
-    display: flex; 
-    flex-wrap: wrap; 
-    justify-content: space-between; 
-    gap: 20px; 
-  }
-  .docente-firma-row { 
-    flex: 1 1 45%; 
-    max-width: 45%; 
-    background: var(--surface); 
-    border: 1px solid var(--border-2); 
-    border-radius: 10px; 
-    padding: 10px; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    gap: 6px; 
-  }
-  .coordinador-firma-row { 
-    flex: 1 1 45%; 
-    max-width: 45%; 
-    background: var(--surface); 
-    border: 1px solid var(--border-2); 
-    border-radius: 10px; 
-    padding: 10px; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    gap: 6px; 
-    margin-left: auto; 
-  }
-  .docente-firma-item { 
-    width: 100%; 
-    padding: 6px 8px; 
-    border: 1px solid var(--border-2); 
-    border-radius: 8px; 
-    text-align: center; 
-    background: var(--bg); 
-    color: var(--fg); 
-    font-weight: bold;
-  }
-  .vobo-text {
-    font-style: italic;
-    font-size: 9pt;
-    margin-top: 4px;
-  }
-  .firma-docente { 
-    width: 100%; 
-  }
-  .firma-preview { 
-    max-height: 60px; 
-    border: 1px solid var(--border); 
-    border-radius: 6px; 
-    padding: 2px; 
-    background: var(--surface); 
-  }
-
-  /* NOTA FLOTANTE DE DERECHOS RESERVADOS - Solo en formulario */
-  .derechos-reservados {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 9pt;
-    color: var(--muted);
-    z-index: 1000;
-    box-shadow: var(--shadow);
-  }
-
-  /* ENCABEZADO INFORMATIVO - Solo en formulario */
-  .info-coordinadores {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-    margin: 12px 0;
-    font-size: 9pt;
-  }
-  .info-coordinadores h3 {
-    margin: 0 0 8px 0;
-    font-size: 10pt;
-    text-align: center;
-  }
-  .info-coordinadores ul {
-    margin: 0;
-    padding-left: 16px;
-  }
-
-  /* Logotipos para PDF - ELIMINADOS */
-  .pdf-logos {
-    display: none;
-  }
-
-  /* Exportación */
-  .export-actions{ display:flex; gap:12px; flex-wrap:wrap; margin-top:14px }
-
-  /* Accesibilidad visual */
-  :focus{ outline:3px solid var(--focus); outline-offset:2px }
-
-  /* Impresión - CORRECCIÓN COMPLETA DE FIRMAS Y CAMPOS DE MINUTOS/PUNTOS */
-  @media print{
-    *{ 
-      font-family: Arial, sans-serif !important; 
-      font-size:10pt !important; 
-      -webkit-print-color-adjust:exact !important; 
-      print-color-adjust:exact !important;
-      color-adjust: exact !important;
-    }
-    body{ background:white !important; color:black !important }
-    .container{ max-width:100% !important; padding:10px !important }
-    
-    /* Tamaño de página carta */
-    @page {
-      size: 21.59cm 27.94cm;
-      margin: 12mm;
-    }
-    
-    /* MEJORA: Logotipos SOLO en la primera página - ELIMINADOS */
-    .pdf-logos {
-      display: none !important;
-    }
-    
-    /* Ocultar encabezado "INSTRUMENTO CLAR · Planificación Semanal" */
-    .page-header {
-      display: none !important;
-    }
-    
-    /* Mantener colores del encabezado */
-    .master-header{ 
-      background:#d1fae5 !important; 
-      border:1px solid #16a34a !important;
-      border-radius:12px !important;
-      padding:14px !important;
-      margin:12px 0 !important;
-    }
-    .master-header label{ font-weight:bold !important; color:#000 !important }
-    .master-header input, .master-header select, .master-header textarea{ 
-      background:#eafff3 !important;
-      border:1px solid #16a34a !important;
-      font-weight:normal !important;
-    }
-    
-    /* Mostrar valores de los campos en PDF */
-    .master-header input, .master-header select, .master-header textarea {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-      color: #000 !important;
-    }
-    
-    /* Campos de solo lectura para mostrar datos */
-    .print-field {
-      display: block !important;
-      background:#eafff3 !important;
-      border:1px solid #16a34a !important;
-      color: #000 !important;
-      font-weight: normal !important;
-    }
-    
-    /* CORRECCIÓN: Mostrar la carrera en el PDF */
-    #fld-carrera {
-      display: none !important;
-    }
-    #print-carrera {
-      display: block !important;
-      background:#eafff3 !important;
-      border:1px solid #16a34a !important;
-      color: #000 !important;
-      font-weight: normal !important;
-    }
-    
-    /* Ocultar campos editables en PDF */
-    .master-header input[type="text"],
-    .master-header input[type="number"],
-    .master-header textarea:not([readonly]),
-    .master-header select:not(#fld-carrera) {
-      display: none !important;
-    }
-    
-    /* CORRECCIÓN COMPLETA: Mostrar minutos y puntos en PDF */
-    .week input.minutos,
-    .week input.puntos-netos,
-    .week input.puntos-acumulados {
-      display: none !important;
-    }
-    
-    .week .print-minutos,
-    .week .print-puntos-netos,
-    .week .print-puntos-acumulados {
-      display: block !important;
-      color: #000 !important;
-      font-weight: normal !important;
-      background: transparent !important;
-    }
-    
-    /* Mantener colores de secciones finales */
-    .final-title{ 
-      background:#d1fae5 !important;
-      border:1px solid #16a34a !important;
-      border-bottom:none !important;
-    }
-    .final-body{ 
-      background:#d1fae5 !important;
-      border:1px solid #16a34a !important;
-    }
-    .final-body textarea{ 
-      background:#eafff3 !important;
-      color: #000 !important;
-    }
-    
-    /* Mantener colores de semanas */
-    .week{ 
-      background:#f9fafb !important; 
-      border:1px solid #cbd5e1 !important;
-      border-radius:12px !important;
-    }
-    
-    /* Mostrar valores en las semanas */
-    .week textarea {
-      border: none !important;
-      background: transparent !important;
-      color: #000 !important;
-    }
-    
-    /* Mantener colores de modalidades */
-    .mod-teo td, .mod-teo{ background:#f7c7cf !important }
-    .mod-pra td, .mod-pra{ background:#cfe0f7 !important }
-    .mod-aut td, .mod-aut{ background:#fff5a8 !important }
-    
-    /* Mantener colores de reportes */
-    .report-head{ background:#a7d7a7 !important }
-    .clar-merged{ background:#ff8c00 !important }
-    .eval-head{ background:#dbeafe !important }
-    .over-cap{ background:#fee2e2 !important; color:#7f1d1d !important }
-    
-    /* Mantener colores de badges */
-    .badge{ background:#eafff3 !important; border:1px solid #94a3b8 !important }
-    .badge.warn{ background:#fee2e2 !important; border-color:#ef4444 !important }
-    .exam-badge{ background:#fde68a !important; border:1px solid #f59e0b !important }
-    
-    /* CORRECCIÓN COMPLETA: Sección de firmas de docentes en PDF */
-    .docentes-section {
-      display: block !important;
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-      margin-top: 40px !important;
-      padding: 0 !important;
-      page-break-inside: avoid !important;
-    }
-    
-    .docentes-title {
-      text-align: center !important;
-      font-weight: bold !important;
-      margin-bottom: 25px !important;
-      color: #000 !important;
-      font-size: 11pt !important;
-      border-bottom: none !important; /* ELIMINAR LÍNEA HORIZONTAL */
-      padding-bottom: 0 !important; /* ELIMINAR ESPACIO EXTRA */
-    }
-    
-    .docentes-grid {
-      display: flex !important;
-      flex-wrap: wrap !important;
-      justify-content: space-between !important;
-      gap: 30px !important;
-      margin-bottom: 40px !important;
-    }
-    
-    .docente-firma-row, .coordinador-firma-row {
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      background: transparent !important;
-      border: none !important;
-      margin-bottom: 0 !important;
-      page-break-inside: avoid !important;
-      padding: 0 !important;
-      flex: 1 1 45% !important;
-      min-width: 45% !important;
-    }
-    
-    .coordinador-firma-row {
-      margin-left: auto !important;
-    }
-    
-    .docente-firma-item, .coordinador-firma-item {
-      background: transparent !important;
-      border: none !important;
-      font-weight: bold !important;
-      text-align: center !important;
-      padding: 0 !important;
-      margin-top: 10px !important;
-      color: #000 !important;
-      font-size: 10pt !important;
-      font-family: Arial, sans-serif !important;
-      border-top: 1px solid #000 !important;
-      padding-top: 8px !important;
-      width: 100% !important;
-      display: block !important;
-    }
-    
-    .vobo-text {
-      font-style: italic !important;
-      font-size: 9pt !important;
-      margin-top: 4px !important;
-      color: #000 !important;
-    }
-    
-    .firma-preview {
-      display: block !important;
-      max-height: 50px !important;
-      border: none !important;
-      background: transparent !important;
-      padding: 0 !important;
-      margin-bottom: 5px !important;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Página de presentación institucional del Dr. Walter Valdemar Poroj Sacor, Director de la División de Ciencias Económicas, y del proyecto CLAR para Plan Diario, Fin de Semana y PECED." />
+  <meta name="theme-color" content="#0b3b75" />
+  <title>Presentación | Dr. Walter Valdemar Poroj Sacor</title>
+  <style>
+    :root{
+      --azul:#0b3b75;
+      --azul-2:#164f9b;
+      --azul-3:#1f64c2;
+      --celeste:#dcecff;
+      --celeste-2:#eef5ff;
+      --dorado:#d9a320;
+      --dorado-2:#ffd873;
+      --gris:#f5f8fc;
+      --gris-2:#e8eef7;
+      --texto:#1b2430;
+      --texto-suave:#526377;
+      --blanco:#ffffff;
+      --sombra:0 18px 40px rgba(11,59,117,.18);
+      --sombra-suave:0 12px 28px rgba(11,59,117,.10);
+      --radio:24px;
+      --radio-lg:32px;
+      --max:1180px;
+      --trans:all .25s ease;
     }
 
-    /* CORRECCIÓN: Ocultar textarea de bibliografía editable y mostrar solo el campo de impresión */
-    #biblio-egrafia {
-      display: none !important;
-    }
-    #print-biblio {
-      display: block !important;
-      background: transparent !important;
-      border: none !important;
-      padding: 6px 8px !important;
-      color: #000 !important;
-      font-weight: normal !important;
-      white-space: pre-wrap !important;
-      word-break: break-word !important;
-      line-height: 1.4 !important;
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      color:var(--texto);
+      background:linear-gradient(180deg,#eef5ff 0%, #f8fbff 45%, #ffffff 100%);
+      line-height:1.6;
     }
 
-    /* Mostrar solo lectura para textareas editables */
-    textarea:not([readonly]) {
-      background: transparent !important;
-      border: none !important;
-      resize: none !important;
-      color: #000 !important;
+    img{max-width:100%; display:block}
+    a{color:inherit}
+    button{font:inherit}
+
+    .wrap{
+      width:min(var(--max), 92%);
+      margin:0 auto;
     }
 
-    /* MEJORA: Ocultar elementos innecesarios en PDF */
-    .setup-bar, .export-actions, .logo-actions, .del-doc, .add-doc-inline, 
-    .btn, .btn-sm, input[type="file"], .final-note,
-    input[type="number"], input[type="text"], select:not([readonly]),
-    .course-manager, .add-docente,
-    .docentes-section .add-docente,
-    .firma-docente,
-    .derechos-reservados,
-    .info-coordinadores {
-      display: none !important;
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:80;
+      background:rgba(255,255,255,.88);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid rgba(11,59,117,.08);
     }
-    
-    /* Ajustes de layout para impresión */
-    .week{ 
-      break-inside:avoid; 
-      page-break-inside:avoid;
-      margin-bottom:15px !important;
+
+    .topbar-inner{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:18px;
+      min-height:74px;
     }
-    .master-header{ margin:10px 0 !important }
-    
-    th{ background:#f1f5f9 !important }
-  }
-  
-  /* Docentes */
-  .docentes-list{ display:flex; flex-direction:column; gap:6px; width:100% }
-  .docente-row{ display:flex; gap:6px; width:100% }
-  .docente-item{ flex:1; padding:6px 8px; border:1px solid var(--brand); border-radius:8px; background:var(--surface-2); font-size:10pt; font-weight:normal }
-  .del-doc{ border:1px solid var(--border-2); border-radius:8px; background:#fee2e2; color:#7f1d1d; font-weight:700; padding:0 10px; cursor: pointer }
-  .del-doc:hover{ filter:brightness(.97) }
-  .add-doc-inline{ background: var(--brand-2); color: white; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; margin-top: 8px; }
-</style>
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+
+    .brand strong{
+      color:var(--azul);
+      font-size:1rem;
+    }
+
+    .brand span{
+      color:var(--texto-suave);
+      font-size:.92rem;
+    }
+
+    .nav{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .nav a,
+    .nav button{
+      text-decoration:none;
+      border:none;
+      background:transparent;
+      color:var(--azul);
+      font-weight:700;
+      padding:10px 14px;
+      border-radius:999px;
+      cursor:pointer;
+      transition:var(--trans);
+    }
+
+    .nav a:hover,
+    .nav button:hover,
+    .nav a:focus-visible,
+    .nav button:focus-visible{
+      background:var(--celeste-2);
+      outline:none;
+    }
+
+    .nav-cta{
+      background:var(--azul) !important;
+      color:#fff !important;
+      box-shadow:0 10px 20px rgba(11,59,117,.16);
+    }
+
+    .menu-wrap{
+      position:relative;
+    }
+
+    .dropdown{
+      position:absolute;
+      top:calc(100% + 10px);
+      right:0;
+      min-width:290px;
+      background:#fff;
+      border:1px solid rgba(11,59,117,.10);
+      border-radius:20px;
+      box-shadow:0 20px 40px rgba(11,59,117,.16);
+      padding:10px;
+      opacity:0;
+      visibility:hidden;
+      transform:translateY(8px);
+      transition:var(--trans);
+    }
+
+    .dropdown.show{
+      opacity:1;
+      visibility:visible;
+      transform:translateY(0);
+    }
+
+    .dropdown a{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      text-decoration:none;
+      color:var(--azul);
+      font-weight:700;
+      padding:12px 14px;
+      border-radius:14px;
+      transition:var(--trans);
+    }
+
+    .dropdown a:hover,
+    .dropdown a:focus-visible{
+      background:var(--celeste-2);
+      outline:none;
+    }
+
+    .hero-bg{
+      position:relative;
+      overflow:hidden;
+      padding:44px 0 56px;
+      background:
+        radial-gradient(circle at top left, rgba(217,163,32,.20), transparent 22%),
+        radial-gradient(circle at right, rgba(22,79,155,.22), transparent 26%),
+        linear-gradient(135deg, #0b3b75 0%, #164f9b 55%, #1f64c2 100%);
+    }
+
+    .hero-bg::before,
+    .hero-bg::after{
+      content:"";
+      position:absolute;
+      border-radius:999px;
+      filter:blur(6px);
+      opacity:.18;
+      pointer-events:none;
+    }
+
+    .hero-bg::before{
+      width:260px;
+      height:260px;
+      top:-80px;
+      right:6%;
+      background:#fff;
+    }
+
+    .hero-bg::after{
+      width:180px;
+      height:180px;
+      bottom:-70px;
+      left:4%;
+      background:#d9a320;
+    }
+
+    .badge{
+      display:inline-block;
+      padding:10px 18px;
+      border:1px solid rgba(255,255,255,.25);
+      color:#fff;
+      background:rgba(255,255,255,.08);
+      backdrop-filter:blur(8px);
+      border-radius:999px;
+      font-size:.95rem;
+      letter-spacing:.4px;
+      margin-bottom:18px;
+    }
+
+    .hero-card{
+      position:relative;
+      z-index:1;
+      display:grid;
+      grid-template-columns:420px 1fr;
+      gap:34px;
+      align-items:center;
+      padding:28px;
+      background:rgba(255,255,255,.97);
+      border-radius:var(--radio-lg);
+      box-shadow:var(--sombra);
+    }
+
+    .photo-box{
+      position:relative;
+      background:linear-gradient(180deg, #f1f7ff 0%, #dcebff 100%);
+      border-radius:28px;
+      padding:16px;
+      box-shadow:inset 0 0 0 1px rgba(11,59,117,.08);
+    }
+
+    .photo-box img{
+      width:100%;
+      border-radius:22px;
+      object-fit:cover;
+      box-shadow:0 14px 28px rgba(0,0,0,.18);
+    }
+
+    .photo-label{
+      position:absolute;
+      left:28px;
+      bottom:28px;
+      background:rgba(11,59,117,.92);
+      color:#fff;
+      padding:10px 14px;
+      border-radius:14px;
+      font-size:.92rem;
+      box-shadow:0 8px 20px rgba(11,59,117,.25);
+    }
+
+    h1{
+      margin:0 0 10px;
+      font-size:clamp(2rem, 4vw, 3.5rem);
+      line-height:1.06;
+      color:var(--azul);
+    }
+
+    .subtitle{
+      font-size:1.18rem;
+      color:#48617c;
+      margin:0 0 18px;
+      font-weight:700;
+    }
+
+    .lead{
+      font-size:1.06rem;
+      line-height:1.82;
+      margin:0 0 20px;
+      color:#334457;
+    }
+
+    .highlight{
+      color:var(--azul);
+      font-weight:700;
+    }
+
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin:18px 0 22px;
+    }
+
+    .pill{
+      padding:12px 16px;
+      border-radius:999px;
+      background:#eef5ff;
+      color:var(--azul);
+      font-weight:700;
+      border:1px solid #d4e5ff;
+      font-size:.96rem;
+    }
+
+    .hero-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:14px;
+      margin-top:10px;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:14px 18px;
+      border-radius:16px;
+      text-decoration:none;
+      font-weight:700;
+      transition:var(--trans);
+      border:1px solid transparent;
+      cursor:pointer;
+    }
+
+    .btn-primary{
+      background:linear-gradient(135deg, var(--azul) 0%, var(--azul-2) 100%);
+      color:#fff;
+      box-shadow:0 12px 24px rgba(11,59,117,.18);
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus-visible{
+      transform:translateY(-2px);
+      box-shadow:0 16px 28px rgba(11,59,117,.22);
+      outline:none;
+    }
+
+    .btn-secondary{
+      background:#fff;
+      color:var(--azul);
+      border-color:rgba(11,59,117,.14);
+    }
+
+    .btn-secondary:hover,
+    .btn-secondary:focus-visible{
+      background:var(--celeste-2);
+      outline:none;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:16px;
+      margin-top:24px;
+    }
+
+    .stat{
+      background:#fff;
+      border:1px solid rgba(11,59,117,.08);
+      border-radius:20px;
+      padding:18px;
+      box-shadow:var(--sombra-suave);
+      text-align:center;
+    }
+
+    .stat strong{
+      display:block;
+      color:var(--azul);
+      font-size:1.25rem;
+      margin-bottom:6px;
+    }
+
+    .stat span{
+      color:var(--texto-suave);
+      font-size:.95rem;
+    }
+
+    section{
+      padding:68px 0;
+    }
+
+    .section-head{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:0;
+      margin-bottom:10px;
+    }
+
+    .section-title{
+      font-size:clamp(1.7rem, 3vw, 2.4rem);
+      margin:0 0 12px;
+      color:var(--azul);
+    }
+
+    .section-text{
+      max-width:940px;
+      line-height:1.85;
+      font-size:1.05rem;
+      margin:0;
+      color:#334457;
+    }
+
+    .divider{
+      width:92px;
+      height:5px;
+      border-radius:999px;
+      background:linear-gradient(90deg, var(--dorado), #ffd873);
+      margin:18px 0 22px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:22px;
+      margin-top:28px;
+    }
+
+    .card,
+    .option-card,
+    .feature-panel,
+    .info-panel,
+    .faq-item{
+      background:var(--blanco);
+      border-radius:var(--radio);
+      border:1px solid rgba(11,59,117,.07);
+      box-shadow:var(--sombra-suave);
+    }
+
+    .card{
+      padding:26px;
+      transition:var(--trans);
+    }
+
+    .card:hover,
+    .option-card:hover,
+    .info-panel:hover{
+      transform:translateY(-4px);
+    }
+
+    .card h3,
+    .option-card h3,
+    .feature-panel h3,
+    .info-panel h3{
+      margin:0 0 12px;
+      color:var(--azul);
+      font-size:1.14rem;
+    }
+
+    .card p,
+    .option-card p,
+    .feature-panel p,
+    .info-panel p,
+    .quote p,
+    .faq-content{
+      margin:0;
+      line-height:1.8;
+      color:#3b4c5f;
+    }
+
+    .clar{
+      background:linear-gradient(180deg, #ffffff 0%, #f2f7ff 100%);
+    }
+
+    .options-grid{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:20px;
+      margin-top:28px;
+    }
+
+    .option-card{
+      padding:24px;
+      scroll-margin-top:100px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .option-card::after{
+      content:"";
+      position:absolute;
+      inset:auto -40px -40px auto;
+      width:120px;
+      height:120px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(220,236,255,.9), rgba(220,236,255,0));
+      pointer-events:none;
+    }
+
+    .option-card span{
+      display:inline-block;
+      margin-bottom:10px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:#eef5ff;
+      color:var(--azul);
+      font-weight:700;
+      font-size:.9rem;
+    }
+
+    .option-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .option-link{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      background:var(--azul);
+      color:#fff;
+      padding:12px 16px;
+      border-radius:14px;
+      font-weight:700;
+      box-shadow:0 10px 20px rgba(11,59,117,.18);
+      transition:var(--trans);
+    }
+
+    .option-link:hover,
+    .option-link:focus-visible{
+      transform:translateY(-2px);
+      outline:none;
+    }
+
+    .option-link.alt{
+      background:#fff;
+      color:var(--azul);
+      border:1px solid rgba(11,59,117,.12);
+      box-shadow:none;
+    }
+
+    .clar-box{
+      display:grid;
+      grid-template-columns:1.15fr .95fr;
+      gap:24px;
+      align-items:stretch;
+      margin-top:28px;
+    }
+
+    .feature-panel{
+      border-radius:30px;
+      padding:30px;
+      box-shadow:var(--sombra);
+    }
+
+    .feature-list{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-top:18px;
+    }
+
+    .feature-item{
+      padding:16px;
+      border-radius:18px;
+      background:var(--celeste-2);
+      border:1px solid rgba(11,59,117,.08);
+      color:#345;
+      font-weight:700;
+      line-height:1.6;
+    }
+
+    .quote{
+      background:linear-gradient(135deg, var(--azul) 0%, var(--azul-2) 100%);
+      color:#fff;
+      border-radius:30px;
+      padding:34px 30px;
+      box-shadow:var(--sombra);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+
+    .quote p{color:#fff}
+
+    .quote strong{
+      display:block;
+      margin-top:18px;
+      color:#ffd873;
+      font-size:1rem;
+    }
+
+    .info-grid{
+      display:grid;
+      grid-template-columns:repeat(2, 1fr);
+      gap:22px;
+      margin-top:28px;
+    }
+
+    .info-panel{
+      padding:26px;
+    }
+
+    .faq{
+      margin-top:28px;
+      display:grid;
+      gap:14px;
+    }
+
+    .faq-item{
+      overflow:hidden;
+    }
+
+    .faq-btn{
+      width:100%;
+      text-align:left;
+      padding:20px 22px;
+      border:none;
+      background:#fff;
+      color:var(--azul);
+      font-weight:700;
+      cursor:pointer;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+    }
+
+    .faq-btn span:last-child{
+      font-size:1.2rem;
+      transition:var(--trans);
+    }
+
+    .faq-item.open .faq-btn span:last-child{
+      transform:rotate(45deg);
+    }
+
+    .faq-content{
+      max-height:0;
+      overflow:hidden;
+      transition:max-height .3s ease, padding .3s ease;
+      padding:0 22px;
+    }
+
+    .faq-item.open .faq-content{
+      max-height:220px;
+      padding:0 22px 20px;
+    }
+
+    .footer{
+      padding:30px 0 44px;
+      text-align:center;
+      color:#5a6b7d;
+      font-size:.96rem;
+      border-top:1px solid rgba(11,59,117,.08);
+      background:#fff;
+      margin-top:20px;
+    }
+
+    .back-top{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      width:52px;
+      height:52px;
+      border-radius:50%;
+      border:none;
+      background:var(--azul);
+      color:#fff;
+      box-shadow:0 14px 28px rgba(11,59,117,.24);
+      cursor:pointer;
+      display:none;
+      z-index:90;
+    }
+
+    .back-top.show{display:block}
+
+    .assist-float{
+      position:fixed;
+      left:18px;
+      bottom:18px;
+      z-index:90;
+      text-decoration:none;
+      background:linear-gradient(135deg, var(--dorado) 0%, #f0b62e 100%);
+      color:#13233a;
+      font-weight:700;
+      padding:14px 18px;
+      border-radius:999px;
+      box-shadow:0 16px 28px rgba(217,163,32,.28);
+    }
+
+    .reveal{
+      opacity:0;
+      transform:translateY(20px);
+      transition:opacity .5s ease, transform .5s ease;
+    }
+
+    .reveal.visible{
+      opacity:1;
+      transform:none;
+    }
+
+    @media (max-width: 1100px){
+      .stats,
+      .options-grid{
+        grid-template-columns:repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 980px){
+      .hero-card,
+      .clar-box,
+      .info-grid{
+        grid-template-columns:1fr;
+      }
+
+      .grid{
+        grid-template-columns:1fr;
+      }
+
+      .photo-box{
+        max-width:520px;
+        margin:0 auto;
+      }
+
+      .feature-list{
+        grid-template-columns:1fr;
+      }
+
+      .nav{
+        gap:6px;
+      }
+    }
+
+    @media (max-width: 640px){
+      .topbar-inner{
+        flex-direction:column;
+        justify-content:center;
+        align-items:flex-start;
+        padding:12px 0;
+      }
+
+      .nav{
+        width:100%;
+      }
+
+      .nav a,
+      .nav button,
+      .nav-cta,
+      .btn,
+      .option-link,
+      .assist-float{
+        width:100%;
+        justify-content:center;
+      }
+
+      .dropdown{
+        right:auto;
+        left:0;
+        width:min(100%, 320px);
+      }
+
+      .hero-bg{padding:28px 0 38px}
+      .hero-card{padding:18px}
+      .feature-panel,.quote,.card,.option-card,.info-panel{padding:22px}
+      .pill-row{gap:10px}
+      .pill{width:100%; text-align:center}
+      .stats,
+      .options-grid{
+        grid-template-columns:1fr;
+      }
+
+      .assist-float{
+        left:12px;
+        right:12px;
+        bottom:12px;
+        border-radius:18px;
+        text-align:center;
+      }
+
+      .back-top{
+        right:12px;
+        bottom:78px;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-  <!-- NOTA DE DERECHOS RESERVADOS - Solo en formulario -->
-  <div class="derechos-reservados">
-   Licencia: CC BY-NC-ND 4.0 | Autor: Dr. José Rodolfo Chávez Mejía | Uso institucional autorizado: División de CCEE, CUNOC-USAC | Contacto: drjosechavezia@gmail.com | Tel: (+502) 5213-3500 | Versión 2026.1
-  </div>
-
-  <div class="page-header">
-    <h1>INSTRUMENTO CLAR · Planificación Semanal</h1>
-  </div>
-
-  <!-- ENCABEZADO INFORMATIVO - MODIFICADO según solicitud -->
-  <div class="info-coordinadores">
-    <h3>GUÍA PARA PROGRAMAR CRÉDITOS LATINOAMERICANOS DE REFERENCIA (CLAR) EN EL PLAN FIN DE SEMANA Y PECED PARA LA DIVISIÓN DE CIENCIAS ECONOMICAS DEL CUNOC-USAC</h3>
-    <p><strong>Director:</strong> Dr. Walter Valdemar Poroj Sacor.</p>
-    <p><strong>Coordinadores:</strong></p>
-    <ul>
-      <li>M. Sc. Mauro Sierra Hengstemberg, Contaduría Pública y Auditoría.</li>
-      <li>Dr. Walter Alfredo Santizo López, Administración de Empresas.</li>
-      <li>M. Sc. Fernando Rodríguez Ángel, Economía.</li>
-      <li>M. Sc. Luis Fernando Aguilar Alvarado, Área Común.</li>
-    </ul>
-    <p><strong>Diseño Curricular:</strong></p>
-    <ul>
-      <li>M. Sc. Luz Maria Lima Soto.</li>
-      <li>Dr. José Rodolfo Chávez Mejía.</p>
-  </div>
-
-  <!-- Gestión de cursos -->
-  <div class="course-manager">
-    <h3>Gestión de Cursos</h3>
-    <div class="course-actions">
-      <select id="course-select" class="course-select">
-        <option value="">Seleccionar curso...</option>
-      </select>
-      <button id="btn-new-course" class="btn success">Nuevo Curso</button>
-      <button id="btn-save-course" class="btn">Guardar Curso</button>
-      <button id="btn-rename-course" class="btn ghost">Renombrar</button>
-      <button id="btn-delete-course" class="btn warn">Eliminar</button>
-      <button id="btn-export-course" class="btn">Exportar a Archivo</button>
-      <input type="file" id="import-file" accept=".json" style="display:none" />
-      <button id="btn-import-course" class="btn ghost">Importar desde Archivo</button>
-    </div>
-  </div>
-
-  <!-- Barra de configuración - MODIFICADO el texto de Lun–Vie a Lunes a Domingo -->
-  <div class="setup-bar" role="region" aria-label="Configuración de semanas">
-    <label for="weeks-count">Semanas:
-      <input type="number" id="weeks-count" min="1" max="40" value="16" />
-    </label>
-    <label for="weeks-start">Inicio (DÍA-MES-AÑO):
-      <input type="date" id="weeks-start" />
-    </label>
-    <label style="display:flex;align-items:center;gap:6px" for="weeks-snap">
-      <input type="checkbox" id="weeks-snap" checked /> Ajustar al lunes (Lunes a Domingo)
-    </label>
-    <button id="create-weeks" class="btn success">Crear semanas</button>
-    <button id="btn-clear" class="btn ghost" title="Borrar todo y reiniciar">Limpiar</button>
-  </div>
-
-  <!-- Encabezado maestro (único) -->
-  <section class="master-header" aria-labelledby="hdr-title">
-    <h2 id="hdr-title" class="visually-hidden" style="position:absolute;left:-9999px">Encabezado del curso</h2>
-
-    <div class="header-top">
-      <div class="top-left">
-        <div class="row">
-          <label for="fld-universidad">Universidad:</label>
-          <textarea id="fld-universidad" data-field="universidad" readonly title="Campo fijo: no editable">Universidad de San Carlos de Guatemala</textarea>
-        </div>
-        <div class="row">
-          <label for="fld-centro">Centro Universitario:</label>
-          <textarea id="fld-centro" data-field="centro" readonly title="Campo fijo: no editable">Centro Universitario de Occidente (CUNOC)</textarea>
-        </div>
-        <div class="row">
-          <label for="fld-division">División:</label>
-          <textarea id="fld-division" data-field="division" readonly title="Campo fijo: no editable">Ciencias Económicas (CCEE)</textarea>
-        </div>
-        <div class="row">
-          <label for="fld-carrera">Carrera:</label>
-          <select id="fld-carrera" data-field="carrera" aria-describedby="help-carrera">
-            <option>Administración de Empresas</option>
-            <option>Contaduría Pública y Auditoría</option>
-            <option>Economía</option>
-            <option>Área Común</option>
-          </select>
-          <!-- CORRECCIÓN: Campo de impresión para la carrera -->
-          <div class="print-field" id="print-carrera" style="display:none">Administración de Empresas</div>
-          <span id="help-carrera" class="final-note">Seleccione la carrera</span>
-        </div>
-        
-        <!-- CAMPOS CORREGIDOS: Códigos y CLAR en filas separadas -->
-        <div class="row">
-          <label for="fld-cod-carrera">Código de la carrera:</label>
-          <input id="fld-cod-carrera" type="text" data-field="cod_carrera" value="120004" />
-          <div class="print-field" id="print-cod-carrera" style="display:none">120004</div>
-        </div>
-        
-        <div class="row">
-          <label for="fld-cod-curso">Código del curso:</label>
-          <input id="fld-cod-curso" type="text" data-field="cod_curso" value="482" />
-          <div class="print-field" id="print-cod-curso" style="display:none">482</div>
-        </div>
-        
-        <div class="row">
-          <label for="fld-clar">CLAR (Σ horas/24):</label>
-          <input id="fld-clar" type="text" data-field="clar_credit" value="0.00" readonly
-                 title="Se calcula automáticamente con la sumatoria final" />
-          <div class="print-field" id="print-clar" style="display:none">0.00</div>
-        </div>
+  <div class="topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand">
+        <strong>División de Ciencias Económicas</strong>
+        <span>Presentación institucional y proyecto CLAR</span>
       </div>
 
-      <!-- ELIMINADO: Sección completa de logotipos -->
-    </div>
-
-    <div class="header-bottom">
-      <div class="row span-2">
-        <label for="fld-curso">Nombre del curso:</label>
-        <textarea id="fld-curso" data-field="curso">Mercadotecnia II</textarea>
-        <div class="print-field" id="print-curso" style="display:none">Mercadotecnia II</div>
-      </div>
-
-      <div class="row span-2">
-        <label for="fld-requisito">Pre-requisitos (Nombre y código):</label>
-        <textarea id="fld-requisito" data-field="requisito">Mercadotecnia I (Código 123)</textarea>
-        <div class="print-field" id="print-requisito" style="display:none">Mercadotecnia I (Código 123)</div>
-        <label for="fld-postreq" style="min-width:auto">Post-requisitos (Nombre y código):</label>
-        <textarea id="fld-postreq" data-field="postrequisito">—</textarea>
-        <div class="print-field" id="print-postreq" style="display:none">—</div>
-      </div>
-
-      <!-- Ciclo Académico y Año - CORREGIDO -->
-      <div class="row span-2">
-        <label for="fld-ciclo">Ciclo Académico:</label>
-        <select id="fld-ciclo" data-field="ciclo_academico" style="max-width:220px">
-          <option>Primer Semestre</option>
-          <option>Segundo Semestre</option>
-        </select>
-        <div class="print-field" id="print-ciclo" style="display:none">Primer Semestre</div>
-
-        <label for="fld-semestre" style="min-width:auto">Semestre:</label>
-        <select id="fld-semestre" data-field="semestre" style="max-width:120px">
-          <option>Primero</option>
-          <option>Segundo</option>
-          <option>Tercero</option>
-          <option>Cuarto</option>
-          <option>Quinto</option>
-          <option>Sexto</option>
-          <option>Séptimo</option>
-          <option>Octavo</option>
-          <option>Noveno</option>
-          <option>Décimo</option>
-        </select>
-        <div class="print-field" id="print-semestre" style="display:none">Primero</div>
-
-        <label for="fld-anio" style="min-width:auto">Año:</label>
-        <input id="fld-anio" type="number" data-field="anio_academico" min="2000" max="2100"
-               style="max-width:120px" value="2025" />
-        <div class="print-field" id="print-anio" style="display:none">2025</div>
-      </div>
-
-      <div class="row span-2">
-        <label>Nombre del profesor:</label>
-        <div class="docentes-list" id="docentes-list">
-          <div class="docente-row">
-            <textarea class="docente-item" placeholder="Nombre del docente"></textarea>
-            <div class="print-field docente-print" style="display:none"></div>
-            <button type="button" class="del-doc" title="Eliminar docente">×</button>
+      <nav class="nav" aria-label="Navegación principal">
+        <a href="#presentacion">Presentación</a>
+        <a href="#clar">Proyecto CLAR</a>
+        <a href="#proyeccion">Proyección</a>
+        <a href="#preguntas">Preguntas frecuentes</a>
+        <div class="menu-wrap">
+          <button id="clarToggle" aria-expanded="false" aria-controls="clarDropdown" type="button">Accesos CLAR</button>
+          <div class="dropdown" id="clarDropdown" role="menu">
+            <a role="menuitem" href="https://jrchavezmejia.github.io/CREDITOS-CLAR-CCEE-CUNOC-USAC/" target="_blank" rel="noopener noreferrer">Plan Diario <span>↗</span></a>
+            <a role="menuitem" href="https://jrchavezmejia.github.io/CREDITOS-LATINOAMERICANOS-DE-REFERENCIA-FIN-DE-SEMANA-Y-PECED/" target="_blank" rel="noopener noreferrer">Fin de Semana <span>↗</span></a>
+            <a role="menuitem" href="https://jrchavezmejia.github.io/CREDITOS-LATINOAMERICANOS-DE-REFERENCIA-FIN-DE-SEMANA-Y-PECED/" target="_blank" rel="noopener noreferrer">PECED <span>↗</span></a>
+            <a role="menuitem" href="https://jrchavezmejia.github.io/CREDITOS-LATINOAMERICANOS-DE-REFERENCIA-FIN-DE-SEMANA-Y-PECED/" target="_blank" rel="noopener noreferrer">Asistente Virtual CLAR <span>↗</span></a>
           </div>
         </div>
-        <button type="button" class="add-doc-inline" title="Agregar otro docente">+ Docente</button>
-        <textarea id="fld-docente" data-field="docente" style="display:none"></textarea>
+        <a class="nav-cta" href="https://jrchavezmejia.github.io/CREDITOS-LATINOAMERICANOS-DE-REFERENCIA-FIN-DE-SEMANA-Y-PECED/" target="_blank" rel="noopener noreferrer">Asistente Virtual</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="hero-bg" id="presentacion">
+    <div class="wrap">
+      <div class="badge">Director de la División de Ciencias Económicas</div>
+      <div class="hero-card reveal">
+        <div class="photo-box">
+          <img alt="Dr. Walter Valdemar Poroj Sacor" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAA+AyADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD8OLmyNra25RlyhIO4fT2r3L4VeKbDwL4w0rX5lFu01+bv3SPlYlH5qyn8c12X7SfwL0z4f/FU+Jb8G0gu8xM/AJ3qfQj6H0r6Z8SeJ31nSbJr6CCTz5AqLKOMleT82evtX57iM2p4l4HhXMa0faVcPVVpaJte5+W8ScSZRkWQYfL1RoTVk0tJr7j/2Q==" />
+          <div class="photo-label">Presentación institucional</div>
+        </div>
+        <div>
+          <h1>Dr. Walter Valdemar<br>Poroj Sacor</h1>
+          <p class="subtitle">Director de la División de Ciencias Económicas</p>
+          <p class="lead">
+            Con distinguida trayectoria académica y compromiso institucional, el <span class="highlight">Dr. Walter Valdemar Poroj Sacor</span>
+            lidera la División de Ciencias Económicas con una visión orientada al fortalecimiento de la calidad educativa, la innovación académica,
+            la mejora continua y la consolidación de herramientas que fortalezcan la gestión universitaria.
+          </p>
+          <p class="lead">
+            En esta presentación institucional se destaca su papel en la <span class="highlight">presentación del proyecto CLAR</span>,
+            dirigido al <span class="highlight">Plan Diario</span>, <span class="highlight">Plan Fin de Semana</span> y <span class="highlight">PECED</span>,
+            como una iniciativa estratégica para fortalecer la planificación académica, la organización del trabajo docente y la articulación de los procesos formativos.
+          </p>
+
+          <div class="pill-row">
+            <div class="pill">Liderazgo académico</div>
+            <div class="pill">Innovación institucional</div>
+            <div class="pill">Proyecto CLAR</div>
+            <div class="pill">Asistente Virtual</div>
+          </div>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#clar">Explorar proyecto CLAR</a>
+            <a class="btn btn-secondary" href="https://jrchavezmejia.github.io/CREDITOS-LATINOAMERICANOS-DE-REFERENCIA-FIN-DE-SEMANA-Y-PECED/" target="_blank" rel="noopener noreferrer">Abrir Asistente Virtual CLAR</a>
+          </div>
+        </div>
       </div>
 
-      <div class="row span-2">
-        <label for="fld-titulo">Título universitario del docente:</label>
-        <textarea id="fld-titulo" data-field="titulo_docente">PEM en Psicología</textarea>
-        <div class="print-field" id="print-titulo" style="display:none">PEM en Psicología</div>
+      <div class="stats reveal" aria-label="Indicadores destacados">
+        <div class="stat">
+          <strong>3</strong>
+          <span>Modalidades CLAR</span>
+        </div>
+        <div class="stat">
+          <strong>1</strong>
+          <span>Dirección institucional</span>
+        </div>
+        <div class="stat">
+          <strong>4</strong>
+          <span>Accesos directos</span>
+        </div>
+        <div class="stat">
+          <strong>100%</strong>
+          <span>Diseño responsivo</span>
+        </div>
       </div>
-      <div class="row span-2">
-        <label for="fld-email">Correo institucional:</label>
-        <textarea id="fld-email" data-field="email">nombre.apellido@cunoc.edu.gt</textarea>
-        <div class="print-field" id="print-email" style="display:none">nombre.apellido@cunoc.edu.gt</div>
+    </div>
+  </header>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2 class="section-title">Mensaje de presentación</h2>
+        <div class="divider"></div>
+        <p class="section-text">
+          La Dirección de la División de Ciencias Económicas reafirma su compromiso con la excelencia, la actualización permanente
+          y la implementación de propuestas que aporten valor al desarrollo académico. Bajo esta perspectiva, el Dr. Walter Valdemar Poroj Sacor
+          presenta el proyecto CLAR como una propuesta estratégica que contribuye a estructurar, visibilizar y fortalecer la dinámica formativa
+          del Plan Diario, del Plan Fin de Semana y de la PECED, favoreciendo una gestión académica más clara, organizada y orientada a resultados.
+        </p>
       </div>
 
-      <div class="row span-2">
-        <label for="fld-acuerdo">Descripción del acuerdo de aprobación de la Carrera:</label>
-        <textarea id="fld-acuerdo" data-field="acuerdo_carrera"></textarea>
-        <div class="print-field" id="print-acuerdo" style="display:none"></div>
-      </div>
-
-      <div class="row span-2">
-        <label for="fld-horario">Horario de clases:</label>
-        <textarea id="fld-horario" data-field="horario">Lunes: 15:45 a 17:15 horas  |  Martes: 16:30 a 17:15 horas</textarea>
-        <div class="print-field" id="print-horario" style="display:none">Lunes: 15:45 a 17:15 horas  |  Martes: 16:30 a 17:15 horas</div>
-        <label for="fld-seccion" style="min-width:auto">Sección:</label>
-        <input id="fld-seccion" type="text" data-field="seccion" style="max-width:120px" value="B" />
-        <div class="print-field" id="print-seccion" style="display:none">B</div>
-      </div>
-
-      <div class="row span-2">
-        <label for="fld-desc">Descripción del curso:</label>
-        <textarea id="fld-desc" data-field="desc_curso"></textarea>
-        <div class="print-field" id="print-desc" style="display:none"></div>
-      </div>
-      <div class="row span-2">
-        <label for="fld-obj">Objetivos:</label>
-        <textarea id="fld-obj" data-field="objetivos"></textarea>
-        <div class="print-field" id="print-obj" style="display:none"></div>
+      <div class="grid">
+        <article class="card reveal">
+          <h3>Dirección con visión institucional</h3>
+          <p>
+            La gestión del Dr. Walter Valdemar Poroj Sacor se caracteriza por impulsar acciones con enfoque académico, responsabilidad institucional
+            y apertura a procesos de innovación que fortalezcan la formación superior.
+          </p>
+        </article>
+        <article class="card reveal">
+          <h3>Compromiso con la mejora continua</h3>
+          <p>
+            La promoción de herramientas y proyectos estratégicos permite consolidar mecanismos de planificación, seguimiento, evaluación
+            y organización académica en beneficio de estudiantes, docentes y autoridades.
+          </p>
+        </article>
+        <article class="card reveal">
+          <h3>Proyección para modalidades específicas</h3>
+          <p>
+            La presentación del proyecto CLAR para Plan Diario, Plan Fin de Semana y PECED refleja una atención directa a las necesidades
+            de estas modalidades, reconociendo su importancia dentro de la estructura académica de la División.
+          </p>
+        </article>
       </div>
     </div>
   </section>
 
-  <div id="weeks-container" aria-live="polite"></div>
-  <div id="validation-result" class="total-validation" aria-atomic="true" style="font-weight:700; margin-top:8px"></div>
-
-  <!-- Evaluación (antes del reporte final) -->
-  <div id="evaluation-section" class="eval-wrap"></div>
-
-  <!-- Reporte final -->
-  <div id="summary-report" class="report-wrap"></div>
-
-  <!-- Secciones finales -->
-  <div id="final-sections" class="final-wrap">
-    <div class="final-title">Reglamento de Evaluación:</div>
-    <div class="final-body">
-      <textarea id="eval-reglamento" readonly>Artículo 20. Normativo de Evaluación y Promoción de los estudiantes del Centro Universitarios de Occidente. "Los requisitos para someterse a exámenes finales de recuperación son: estar legalmente inscrito, tener asignado el curso, haber llenado el mínimo de puntos de zona que establece este Normativo, presentar su carné de estudiante, u otro medio de identificación a criterio del examinador, su recibo de haber pagado los derechos de exámenes, y haber cumplido con el 80% de asistencia".</textarea>
-    </div>
-    <div class="final-title" style="margin-top:12px">Bibliografía/ E-Grafía</div>
-    <div class="final-body">
-      <textarea id="biblio-egrafia" placeholder="Ingrese la bibliografía / e-grafía…"></textarea>
-      <div class="print-field" id="print-biblio" style="display:none"></div>
-      <div class="final-note">Consejo: cite con formato APA/IEEE, y agregue DOI/URL cuando aplique.</div>
-    </div>
-  </div>
-
-  <!-- MEJORA: Sección ÚNICA de firmas de docentes CON COORDINADOR INTEGRADO -->
-  <div class="docentes-section">
-    <div class="docentes-title">Firmas de Docentes</div>
-    <div id="docentes-firmas-list" class="docentes-grid">
-      <!-- Docente 1 -->
-      <div class="docente-firma-row">
-        <input type="file" accept="image/*" class="firma-docente" title="Subir firma del docente" />
-        <img class="firma-preview" alt="Firma Docente" style="display:none;" />
-        <div class="docente-firma-item">Nombre del Docente</div>
+  <section class="clar" id="clar">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2 class="section-title">Proyecto CLAR</h2>
+        <div class="divider"></div>
+        <p class="section-text">
+          El proyecto CLAR se presenta como una iniciativa de fortalecimiento académico que busca aportar claridad, orden y coherencia a los procesos de planificación,
+          articulación y proyección educativa. Su implementación y presentación en las distintas modalidades constituye un paso importante para afianzar una cultura de trabajo
+          académico más estructurada, pertinente y alineada con las exigencias contemporáneas de la educación superior.
+        </p>
       </div>
-      
-      <!-- Coordinador integrado en la misma sección -->
-      <div class="coordinador-firma-row">
-        <input type="file" accept="image/*" class="firma-docente" title="Subir firma del coordinador" />
-        <img class="firma-preview" alt="Firma Coordinador" style="display:none;" />
-        <div class="coordinador-firma-item" id="nombre-coordinador">M. Sc. Julio César López De León</div>
-        <div class="vobo-text">Vo. Bo. Coordinador de la carrera</div>
+
+      <div class="options-grid">
+        <article class="option-card reveal" id="plan-diario">
+          <span>Opción 1</span>
+          <h3>Plan Diario</h3>
+          <p>
+            Acceso directo a la herramienta vinculada al componente CLAR para la planificación y organización académica del Plan Diario.
+          </p>
+          <div class="option-actions">
+            <a class="option-link" href="https://jrchavezmejia.github.io/CREDITOS-CLAR-CCEE-CUNOC-USAC/" target="_blank" rel="noopener noreferrer">Abrir Plan Diario</a>
+          </div>
+        </article>
+
+        <article class="option-card reveal" id="fin-semana">
+          <span>Opción 2</span>
+          <h3>Fin de Semana</h3>
+          <p>
+            Espacio destinado a la presentación y proyección del proyecto CLAR para la modalidad Fin de Semana dentro de la División de Ciencias Económicas.
+          </p>
+          <div class="option-actions">
+            <a class="option-link" href="https://jrchavezmejia.github.io/CREDITOS-LATINOAMERICANOS-DE-REFERENCIA-FIN-DE-SEMANA-Y-PECED/" target="_blank" rel="noopener noreferrer">Abrir Fin de Semana</a>
+          </div>
+        </article>
+
+        <article class="option-card reveal" id="peced">
+          <span>Opción 3</span>
+          <h3>PECED</h3>
+          <p>
+            Apartado orientado a la presentación del proyecto CLAR en la PECED, resaltando su alcance académico y su contribución a la organización institucional.
+          </p>
+          <div class="option-actions">
+            <a class="option-link" href="https://jrchavezmejia.github.io/CREDITOS-LATINOAMERICANOS-DE-REFERENCIA-FIN-DE-SEMANA-Y-PECED/" target="_blank" rel="noopener noreferrer">Abrir PECED</a>
+          </div>
+        </article>
+
+        <article class="option-card reveal" id="asistente-virtual">
+          <span>Acceso adicional</span>
+          <h3>Asistente Virtual CLAR</h3>
+          <p>
+            Herramienta de apoyo para facilitar la consulta, orientación y acceso rápido a los componentes del proyecto CLAR.
+          </p>
+          <div class="option-actions">
+            <a class="option-link" href="https://jrchavezmejia.github.io/CREDITOS-LATINOAMERICANOS-DE-REFERENCIA-FIN-DE-SEMANA-Y-PECED/" target="_blank" rel="noopener noreferrer">Abrir Asistente Virtual</a>
+          </div>
+        </article>
+      </div>
+
+      <div class="clar-box">
+        <div class="feature-panel reveal">
+          <h3>Ejes de la presentación</h3>
+          <p>
+            La propuesta se orienta a fortalecer la organización académica, optimizar los procesos formativos y consolidar una cultura institucional más clara y funcional.
+          </p>
+          <div class="feature-list">
+            <div class="feature-item">Reconocimiento del papel estratégico del proyecto CLAR en la organización académica.</div>
+            <div class="feature-item">Impulso de acciones orientadas a fortalecer el Plan Diario, el Fin de Semana y la PECED.</div>
+            <div class="feature-item">Proyección de una gestión educativa más ordenada, clara y funcional.</div>
+            <div class="feature-item">Apoyo institucional a procesos de innovación y mejora continua.</div>
+            <div class="feature-item">Fortalecimiento del trabajo académico con visión de calidad y pertinencia.</div>
+            <div class="feature-item">Acompañamiento mediante acceso digital y asistente virtual especializado.</div>
+          </div>
+        </div>
+
+        <aside class="quote reveal">
+          <p>
+            “La consolidación de propuestas académicas con visión estratégica permite avanzar hacia una formación más organizada,
+            pertinente y comprometida con la calidad educativa. En ese marco, la presentación del proyecto CLAR representa una oportunidad
+            valiosa para fortalecer el trabajo del Plan Diario, del Plan Fin de Semana y de la PECED dentro de la División de Ciencias Económicas.”
+          </p>
+          <strong>Dr. Walter Valdemar Poroj Sacor</strong>
+        </aside>
       </div>
     </div>
-    <!-- ELIMINADO: Botón "Agregar Docente" -->
-  </div>
+  </section>
 
-  <div class="export-actions">
-    <!-- ELIMINADO: Botones de Word y CSV -->
-    <button id="btn-export-pdf" class="btn warn">Exportar a PDF</button>
-  </div>
-</div>
+  <section id="proyeccion">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2 class="section-title">Proyección institucional</h2>
+        <div class="divider"></div>
+        <p class="section-text">
+          Esta página de presentación resalta la figura del Dr. Walter Valdemar Poroj Sacor como autoridad académica comprometida con la consolidación de proyectos que
+          contribuyen al fortalecimiento de la División de Ciencias Económicas. La presentación del proyecto CLAR evidencia una dirección activa, propositiva y enfocada
+          en la construcción de mejores condiciones para el desarrollo de la comunidad universitaria.
+        </p>
+      </div>
 
-<script>
-// ======= Estado global =======
-let weekCount = 0;
-const COURSES_STORAGE_KEY = 'clar_usac_courses_v5'; // Incrementado versión para incluir firmas
-const CURRENT_COURSE_KEY = 'clar_usac_current_course_v5';
-const CLAR_DIVISOR = 24; // fijo
-let warnedProceso = false;
-let warnedExamen = false;
-let courses = {};
-let currentCourseId = null;
-let docenteEventInitialized = false; // Bandera para evitar múltiples inicializaciones
+      <div class="info-grid">
+        <article class="info-panel reveal">
+          <h3>Acceso rápido a herramientas</h3>
+          <p>
+            La página centraliza accesos claros y directos para Plan Diario, Fin de Semana, PECED y Asistente Virtual CLAR, facilitando la navegación y la consulta institucional.
+          </p>
+        </article>
+        <article class="info-panel reveal">
+          <h3>Diseño orientado al usuario</h3>
+          <p>
+            La interfaz fue mejorada para ser más intuitiva, visualmente clara, adaptable a teléfonos móviles y fácil de utilizar por docentes, coordinadores y estudiantes.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
 
-// ======= NUEVA FUNCIÓN: Actualizar solo las fechas de las semanas (MODIFICADA: Lun–Vie a Lunes a Domingo) =======
-function updateWeekDates() {
-  const startEl = document.getElementById('weeks-start');
-  const snapEl = document.getElementById('weeks-snap');
-  
-  const baseRaw = startEl.value ? parseLocalDate(startEl.value) : new Date();
-  if (isNaN(baseRaw.getTime())) {
-    alert('Fecha inválida. Use el selector de fecha.');
-    return;
-  }
-  
-  const base = snapEl && snapEl.checked ? toMonday(baseRaw) : baseRaw;
-  const weeks = document.querySelectorAll('#weeks-container .week');
-  
-  weeks.forEach((weekEl, index) => {
-    const startDate = addDays(base, 7 * index);
-    const monday = toMonday(startDate);
-    const sunday = endOfWeek(monday); // Cambiado a domingo
-    
-    // Actualizar título y rango de fechas
-    const title = weekEl.querySelector('h2');
-    const range = weekEl.querySelector('.week-range');
-    
-    if (title) {
-      title.textContent = `Semana ${index + 1} — Inicio: ${formatDMY(startDate)}`;
-    }
-    
-    if (range) {
-      range.textContent = `Semana del ${formatDMY(monday)} al ${formatDMY(sunday)} (Lunes a Domingo)`; // MODIFICADO
-    }
-  });
-}
+  <section id="preguntas">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2 class="section-title">Preguntas frecuentes</h2>
+        <div class="divider"></div>
+        <p class="section-text">
+          Este apartado facilita la comprensión general del propósito de la página y del acceso a los componentes principales del proyecto CLAR.
+        </p>
+      </div>
 
-// ======= MODIFICACIÓN: Función generateWeeksFromControls actualizada =======
-function generateWeeksFromControls() {
-  try {
-    const countEl = document.getElementById('weeks-count');
-    const startEl = document.getElementById('weeks-start');
-    const snapEl = document.getElementById('weeks-snap');
-    const n = parseInt(countEl.value, 10);
-    
-    if (!Number.isInteger(n) || n <= 0) {
-      alert('Ingrese un número válido de semanas.');
-      return;
-    }
-    
-    const baseRaw = startEl.value ? parseLocalDate(startEl.value) : new Date();
-    if (isNaN(baseRaw.getTime())) {
-      alert('Fecha inválida. Use el selector de fecha.');
-      return;
-    }
-    
-    const base = snapEl && snapEl.checked ? toMonday(baseRaw) : baseRaw;
-    const container = document.getElementById('weeks-container');
-    const existingWeeks = container.querySelectorAll('.week').length;
-    
-    // Si la cantidad de semanas es diferente, regenerar todo
-    if (n !== existingWeeks) {
-      container.innerHTML = '';
-      weekCount = 0;
-      for (let i = 0; i < n; i++) addWeek(addDays(base, 7 * i));
-      initDocentes();
-      initAutosize(document);
-    } else {
-      // Si la cantidad es la misma, solo actualizar las fechas
-      updateWeekDates();
-    }
-    
-    computeAll();
-  } catch (e) {
-    console.error(e);
-    alert('No se pudieron crear las semanas desde la barra.');
-  }
-}
+      <div class="faq">
+        <div class="faq-item reveal open">
+          <button class="faq-btn" type="button">
+            <span>¿Qué presenta esta página institucional?</span>
+            <span>+</span>
+          </button>
+          <div class="faq-content">
+            Esta página presenta al Dr. Walter Valdemar Poroj Sacor como Director de la División de Ciencias Económicas y resalta su papel en la presentación del proyecto CLAR.
+          </div>
+        </div>
 
-// ======= Gestión de Cursos - VERSIÓN MEJORADA =======
-function initCourseManager() {
-  // Verificar integridad de cursos cargados
-  loadCourses();
-  
-  // Limpiar cursos corruptos
-  let corruptCourses = [];
-  Object.keys(courses).forEach(id => {
-      if (!validateCourseData(courses[id])) {
-          corruptCourses.push(id);
-      }
-  });
-  
-  corruptCourses.forEach(id => {
-      console.warn('Eliminando curso corrupto:', id);
-      delete courses[id];
-  });
-  
-  if (corruptCourses.length > 0) {
-      saveCourses();
-      console.log(`Se eliminaron ${corruptCourses.length} cursos corruptos`);
-  }
-  
-  updateCourseSelect();
-  
-  // Event listeners para gestión de cursos
-  document.getElementById('btn-new-course').addEventListener('click', createNewCourse);
-  document.getElementById('btn-save-course').addEventListener('click', saveCurrentCourse);
-  document.getElementById('btn-rename-course').addEventListener('click', renameCurrentCourse);
-  document.getElementById('btn-delete-course').addEventListener('click', deleteCurrentCourse);
-  document.getElementById('btn-export-course').addEventListener('click', exportCurrentCourse);
-  document.getElementById('btn-import-course').addEventListener('click', () => document.getElementById('import-file').click());
-  document.getElementById('import-file').addEventListener('change', importCourseFromFile);
-  document.getElementById('course-select').addEventListener('change', switchCourse);
-  
-  // Cargar curso actual o crear uno por defecto
-  const savedCurrentId = localStorage.getItem(CURRENT_COURSE_KEY);
-  if (savedCurrentId && courses[savedCurrentId]) {
-      loadCourse(savedCurrentId);
-  } else if (Object.keys(courses).length > 0) {
-      loadCourse(Object.keys(courses)[0]);
-  } else {
-      createDefaultCourse();
-  }
-}
+        <div class="faq-item reveal">
+          <button class="faq-btn" type="button">
+            <span>¿Qué modalidades incluye el proyecto CLAR?</span>
+            <span>+</span>
+          </button>
+          <div class="faq-content">
+            Incluye accesos para Plan Diario, Plan Fin de Semana y PECED, además de un acceso adicional al Asistente Virtual CLAR.
+          </div>
+        </div>
 
-// Crear curso por defecto sin prompt
-function createDefaultCourse() {
-  const courseId = 'course_' + Date.now();
-  const courseName = 'Nuevo Curso';
-  
-  courses[courseId] = {
-      id: courseId,
-      name: courseName,
-      data: getDefaultCourseData(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-  };
-  
-  saveCourses();
-  updateCourseSelect();
-  loadCourse(courseId);
-  
-  // Actualizar el campo del nombre del curso
-  document.getElementById('fld-curso').value = courseName;
-  syncPrintFields();
-}
+        <div class="faq-item reveal">
+          <button class="faq-btn" type="button">
+            <span>¿Dónde se encuentra el Asistente Virtual CLAR?</span>
+            <span>+</span>
+          </button>
+          <div class="faq-content">
+            El acceso al Asistente Virtual CLAR se encuentra en el menú superior, en el botón destacado de navegación y en su tarjeta correspondiente dentro de la sección del proyecto CLAR.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-function createNewCourse() {
-  const courseName = prompt('Nombre del nuevo curso:', 'Nuevo Curso');
-  
-  if (courseName) {
-      const courseId = 'course_' + Date.now();
-      
-      courses[courseId] = {
-          id: courseId,
-          name: courseName.trim(),
-          data: getDefaultCourseData(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-      };
-      
-      saveCourses();
-      updateCourseSelect();
-      loadCourse(courseId);
-      
-      // Actualizar el campo del nombre del curso
-      document.getElementById('fld-curso').value = courseName.trim();
-      syncPrintFields();
-      
-      console.log(`Curso creado: ${courseName}`);
-  }
-}
+  <footer class="footer">
+    División de Ciencias Económicas · Presentación institucional del Director y del proyecto CLAR
+  </footer>
 
-// MEJORA: Función mejorada para guardar curso
-function saveCurrentCourse() {
-  if (!currentCourseId) {
-      alert('No hay curso seleccionado para guardar.');
-      return;
-  }
-  
-  try {
-      // Obtener el nombre actual del campo del curso
-      const currentCourseName = document.getElementById('fld-curso').value.trim() || 'Curso sin nombre';
-      
-      // Actualizar el objeto del curso
-      courses[currentCourseId].data = collectCurrentState();
-      courses[currentCourseId].name = currentCourseName;
-      courses[currentCourseId].updatedAt = new Date().toISOString();
-      
-      saveCourses();
-      updateCourseSelect();
-      
-      // Mostrar confirmación
-      const btn = document.getElementById('btn-save-course');
-      const originalText = btn.textContent;
-      btn.textContent = '✓ Guardado';
-      btn.style.background = '#10b981';
-      setTimeout(() => {
-          btn.textContent = originalText;
-          btn.style.background = '';
-      }, 2000);
-      
-      console.log(`Curso guardado: ${currentCourseName} (ID: ${currentCourseId})`);
-      
-  } catch (error) {
-      console.error('Error al guardar curso:', error);
-      alert('Error al guardar el curso: ' + error.message);
-  }
-}
+  <a class="assist-float" href="https://jrchavezmejia.github.io/CREDITOS-LATINOAMERICANOS-DE-REFERENCIA-FIN-DE-SEMANA-Y-PECED/" target="_blank" rel="noopener noreferrer">Asistente Virtual CLAR</a>
+  <button class="back-top" id="backTop" type="button" aria-label="Volver arriba">↑</button>
 
-// MEJORA: Función mejorada para cambiar de curso
-function switchCourse() {
-  const selectedId = document.getElementById('course-select').value;
-  
-  if (!selectedId) return;
-  
-  // Guardar curso actual antes de cambiar (si existe)
-  if (currentCourseId && courses[currentCourseId]) {
-      // Guardar el estado actual antes de cambiar
-      courses[currentCourseId].data = collectCurrentState();
-      courses[currentCourseId].name = document.getElementById('fld-curso').value.trim() || courses[currentCourseId].name;
-      saveCourses();
-  }
-  
-  if (courses[selectedId]) {
-      loadCourse(selectedId);
-  } else {
-      console.warn('Curso no encontrado:', selectedId);
-      if (Object.keys(courses).length > 0) {
-          loadCourse(Object.keys(courses)[0]);
-      } else {
-          createDefaultCourse();
-      }
-  }
-}
+  <script>
+    const clarToggle = document.getElementById('clarToggle');
+    const clarDropdown = document.getElementById('clarDropdown');
+    const backTop = document.getElementById('backTop');
+    const faqItems = document.querySelectorAll('.faq-item');
+    const revealItems = document.querySelectorAll('.reveal');
 
-// MEJORA: Función mejorada para cargar curso
-function loadCourse(courseId) {
-  if (!courses[courseId]) {
-      console.error('Curso no encontrado:', courseId);
-      if (Object.keys(courses).length > 0) {
-          courseId = Object.keys(courses)[0];
-      } else {
-          createDefaultCourse();
-          return;
-      }
-  }
-  
-  currentCourseId = courseId;
-  localStorage.setItem(CURRENT_COURSE_KEY, courseId);
-  
-  const course = courses[courseId];
-  
-  // Aplicar el estado del curso
-  applyState(course.data);
-  
-  // Asegurar que el nombre del curso esté sincronizado
-  document.getElementById('fld-curso').value = course.name || 'Curso sin nombre';
-  
-  // Actualizar interfaz
-  document.getElementById('course-select').value = courseId;
-  document.title = `INSTRUMENTO CLAR – ${course.name}`;
-  
-  // Sincronizar campos para PDF
-  syncPrintFields();
-  
-  console.log(`Curso cargado: ${course.name} (ID: ${courseId})`);
-}
-
-// MEJORA: Validación mejorada al renombrar
-function renameCurrentCourse() {
-  if (!currentCourseId) {
-      alert('No hay curso seleccionado para renombrar.');
-      return;
-  }
-  
-  const currentName = courses[currentCourseId].name;
-  const newName = prompt('Nuevo nombre del curso:', currentName);
-  
-  if (newName && newName.trim() !== '') {
-      const trimmedName = newName.trim();
-      courses[currentCourseId].name = trimmedName;
-      
-      // Actualizar también el campo del nombre del curso
-      document.getElementById('fld-curso').value = trimmedName;
-      
-      saveCourses();
-      updateCourseSelect();
-      syncPrintFields();
-      
-      console.log(`Curso renombrado: "${currentName}" → "${trimmedName}"`);
-  }
-}
-
-// MEJORA: Función mejorada para eliminar curso
-function deleteCurrentCourse() {
-  if (!currentCourseId) {
-      alert('No hay curso seleccionado para eliminar.');
-      return;
-  }
-  
-  const courseName = courses[currentCourseId].name;
-  
-  if (confirm(`¿Está seguro de eliminar el curso "${courseName}"? Esta acción no se puede deshacer.`)) {
-      delete courses[currentCourseId];
-      saveCourses();
-      updateCourseSelect();
-      
-      // Cargar otro curso o crear uno nuevo
-      const remainingIds = Object.keys(courses);
-      if (remainingIds.length > 0) {
-          loadCourse(remainingIds[0]);
-      } else {
-          createDefaultCourse();
-      }
-      
-      console.log(`Curso eliminado: ${courseName}`);
-  }
-}
-
-// MEJORA: Actualizar la función updateCourseSelect para mayor robustez
-function updateCourseSelect() {
-  const select = document.getElementById('course-select');
-  const currentValue = select.value;
-  
-  select.innerHTML = '<option value="">Seleccionar curso...</option>';
-  
-  Object.keys(courses).forEach(id => {
-      const course = courses[id];
-      const option = document.createElement('option');
-      option.value = id;
-      option.textContent = course.name || `Curso ${id}`;
-      
-      // Resaltar el curso actual
-      if (id === currentCourseId) {
-          option.selected = true;
-      }
-      
-      select.appendChild(option);
-  });
-  
-  // Si no hay curso seleccionado pero hay cursos, seleccionar el primero
-  if (!currentCourseId && Object.keys(courses).length > 0) {
-      const firstCourseId = Object.keys(courses)[0];
-      select.value = firstCourseId;
-  } else if (currentCourseId) {
-      select.value = currentCourseId;
-  }
-}
-
-// MEJORA: Función para verificar la integridad de los datos del curso
-function validateCourseData(courseData) {
-  if (!courseData) return false;
-  if (!courseData.name || typeof courseData.name !== 'string') return false;
-  if (!courseData.data || typeof courseData.data !== 'object') return false;
-  
-  return true;
-}
-
-function loadCourses() {
-  try {
-    const saved = localStorage.getItem(COURSES_STORAGE_KEY);
-    if (saved) {
-      courses = JSON.parse(saved);
-    }
-  } catch (e) {
-    console.warn('Error cargando cursos:', e);
-    courses = {};
-  }
-}
-
-function saveCourses() {
-  try {
-    localStorage.setItem(COURSES_STORAGE_KEY, JSON.stringify(courses));
-  } catch (e) {
-    console.warn('Error guardando cursos:', e);
-    alert('Error al guardar cursos. El almacenamiento puede estar lleno.');
-  }
-}
-
-function exportCurrentCourse() {
-  if (!currentCourseId) return;
-  
-  const course = courses[currentCourseId];
-  const exportData = {
-    version: '5.0', // Incrementado para incluir firmas
-    exportedAt: new Date().toISOString(),
-    course: course
-  };
-  
-  const dataStr = JSON.stringify(exportData, null, 2);
-  const dataBlob = new Blob([dataStr], {type: 'application/json'});
-  
-  const url = URL.createObjectURL(dataBlob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `curso_clar_${course.name.replace(/[^a-z0-9]/gi, '_')}.json`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-}
-
-function importCourseFromFile(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const importData = JSON.parse(e.target.result);
-      
-      if (importData.version && importData.course) {
-        const course = importData.course;
-        const courseId = 'imported_' + Date.now();
-        
-        courses[courseId] = {
-          ...course,
-          id: courseId,
-          importedAt: new Date().toISOString()
-        };
-        
-        saveCourses();
-        updateCourseSelect();
-        loadCourse(courseId);
-        
-        alert(`Curso "${course.name}" importado exitosamente.`);
-      } else {
-        alert('El archivo no es un curso válido.');
-      }
-    } catch (error) {
-      alert('Error al importar el curso: ' + error.message);
-    }
-  };
-  
-  reader.readAsText(file);
-  event.target.value = ''; // Reset input
-}
-
-// MEJORA: Datos por defecto más completos para cada curso
-function getDefaultCourseData() {
-  return {
-    controls: { 
-      weeks: 16, 
-      start: '', 
-      snap: true 
-    },
-    logos: { 
-      univ: '', 
-      carrera: '' 
-    },
-    weeks: [],
-    docente: '',
-    reglamento: 'Artículo 20. Normativo de Evaluación y Promoción de los estudiantes del Centro Universitarios de Occidente. "Los requisitos para someterse a exámenes finales de recuperación son: estar legalmente inscrito, tener asignado el curso, haber llenado el mínimo de puntos de zona que establece este Normativo, presentar su carné de estudiante, u otro medio de identificación a criterio del examinador, su recibo de haber pagado los derechos de exámenes, y haber cumplido con el 80% de asistencia".',
-    biblio: '',
-    // NUEVO: Datos específicos del formulario para cada curso
-    formData: {
-      universidad: 'Universidad de San Carlos de Guatemala',
-      centro: 'Centro Universitario de Occidente (CUNOC)',
-      division: 'Ciencias Económicas (CCEE)',
-      carrera: 'Administración de Empresas',
-      cod_carrera: '120004',
-      cod_curso: '482',
-      clar_credit: '0.00',
-      curso: 'Nuevo Curso',
-      requisito: 'Mercadotecnia I (Código 123)',
-      postrequisito: '—',
-      ciclo_academico: 'Primer Semestre',
-      semestre: 'Primero',
-      anio_academico: '2025',
-      titulo_docente: 'PEM en Psicología',
-      email: 'nombre.apellido@cunoc.edu.gt',
-      acuerdo_carrera: '',
-      horario: 'Lunes: 15:45 a 17:15 horas  |  Martes: 16:30 a 17:15 horas',
-      seccion: 'B',
-      desc_curso: '',
-      objetivos: ''
-    },
-    // NUEVO: Almacenamiento de firmas
-    firmas: {
-      docentes: [],
-      coordinador: ''
-    }
-  };
-}
-
-// ======= Utilidades =======
-function autoResize(el){ if(!el) return; el.style.height='auto'; el.style.height = (el.scrollHeight) + 'px'; }
-function initAutosize(scope){ (scope||document).querySelectorAll('textarea').forEach(t=>{ autoResize(t); t.addEventListener('input', ()=>autoResize(t)); }); }
-function parseLocalDate(str){ if (typeof str !== 'string') return new Date(str); const parts = str.split('-'); if (parts.length!==3) return new Date(str); const y=+parts[0], mo=+parts[1]-1, d=+parts[2]; return new Date(y, mo, d); }
-function addDays(date, days){ const d=new Date(date.getTime()); d.setDate(d.getDate()+days); return d; }
-function toMonday(date){ const d=new Date(date.getTime()); const day=d.getDay(); const diff=(day===0?-6:1-day); d.setDate(d.getDate()+diff); return d; }
-function formatDMY(date){ const dd=String(date.getDate()).padStart(2,'0'); const mm=String(date.getMonth()+1).padStart(2,'0'); const yyyy=date.getFullYear(); return `${dd}/${mm}/${yyyy}`; }
-// MODIFICADO: Cambiado de viernes a domingo
-function endOfWeek(monday){ return addDays(monday, 6); }
-function parseNum(val){ if(val==null||val==='') return 0; return parseFloat(String(val).replace(',', '.'))||0; }
-
-// ======= Sincronización de campos para PDF =======
-function syncPrintFields() {
-  // Sincronizar todos los campos con sus versiones de impresión
-  const fields = [
-    { input: 'fld-carrera', print: 'print-carrera' }, // CORRECCIÓN: Agregado campo carrera
-    { input: 'fld-cod-carrera', print: 'print-cod-carrera' },
-    { input: 'fld-cod-curso', print: 'print-cod-curso' },
-    { input: 'fld-clar', print: 'print-clar' },
-    { input: 'fld-curso', print: 'print-curso' },
-    { input: 'fld-requisito', print: 'print-requisito' },
-    { input: 'fld-postreq', print: 'print-postreq' },
-    { input: 'fld-ciclo', print: 'print-ciclo' },
-    { input: 'fld-semestre', print: 'print-semestre' },
-    { input: 'fld-anio', print: 'print-anio' },
-    { input: 'fld-titulo', print: 'print-titulo' },
-    { input: 'fld-email', print: 'print-email' },
-    { input: 'fld-acuerdo', print: 'print-acuerdo' },
-    { input: 'fld-horario', print: 'print-horario' },
-    { input: 'fld-seccion', print: 'print-seccion' },
-    { input: 'fld-desc', print: 'print-desc' },
-    { input: 'fld-obj', print: 'print-obj' },
-    { input: 'biblio-egrafia', print: 'print-biblio' }
-  ];
-
-  fields.forEach(field => {
-    const inputEl = document.getElementById(field.input);
-    const printEl = document.getElementById(field.print);
-    if (inputEl && printEl) {
-      if (inputEl.tagName === 'SELECT') {
-        printEl.textContent = inputEl.options[inputEl.selectedIndex].text;
-      } else {
-        printEl.textContent = inputEl.value;
-      }
-    }
-  });
-
-  // Sincronizar docentes
-  const docenteItems = document.querySelectorAll('.docente-item');
-  const docentePrints = document.querySelectorAll('.docente-print');
-  docenteItems.forEach((item, index) => {
-    if (docentePrints[index]) {
-      docentePrints[index].textContent = item.value;
-    }
-  });
-
-  // CORRECCIÓN: Sincronizar nombres de docentes en la sección de firmas
-  const docenteFirmaItems = document.querySelectorAll('.docente-firma-item');
-  docenteFirmaItems.forEach(item => {
-    // Los nombres ya están sincronizados automáticamente en esta sección
-  });
-
-  // CORRECCIÓN: Sincronizar minutos y puntos para PDF
-  document.querySelectorAll('#weeks-container .week').forEach(week => {
-    week.querySelectorAll('.minutos').forEach((minutoInput, index) => {
-      const printMinuto = minutoInput.closest('td').querySelector('.print-minutos');
-      if (printMinuto) {
-        printMinuto.textContent = minutoInput.value || '0';
-      }
-    });
-    
-    week.querySelectorAll('.puntos-netos').forEach((puntoInput, index) => {
-      const printPunto = puntoInput.closest('td').querySelector('.print-puntos-netos');
-      if (printPunto) {
-        printPunto.textContent = puntoInput.value || '0';
-      }
-    });
-    
-    week.querySelectorAll('.puntos-acumulados').forEach((acumuladoInput, index) => {
-      const printAcumulado = acumuladoInput.closest('td').querySelector('.print-puntos-acumulados');
-      if (printAcumulado) {
-        printAcumulado.textContent = acumuladoInput.value || '0';
-      }
-    });
-  });
-}
-
-// ======= CORRECCIÓN: Gestión de docentes mejorada =======
-function syncDocentesToHidden(){
-  const list = document.getElementById('docentes-list');
-  const hidden = document.getElementById('fld-docente');
-  if(!list || !hidden) return;
-  
-  const vals = Array.from(list.querySelectorAll('.docente-item'))
-    .map(t=>t.value.trim())
-    .filter(Boolean);
-  hidden.value = vals.join('\\n');
-  syncPrintFields(); // Sincronizar también para PDF
-  syncDocentesToFirmas(); // Sincronizar con sección de firmas
-}
-
-function initDocentes() {
-  // Solo inicializar una vez
-  if (docenteEventInitialized) return;
-  
-  const list = document.getElementById('docentes-list');
-  if (!list) return;
-  
-  // Event listener para sincronización de inputs
-  list.addEventListener('input', syncDocentesToHidden);
-  
-  // Event listener para agregar y eliminar docentes
-  document.addEventListener('click', (evt)=>{
-    // Manejar agregar docente
-    const addBtn = evt.target.closest('.add-doc-inline');
-    if(addBtn){
-      evt.preventDefault();
-      evt.stopPropagation(); // Prevenir múltiples ejecuciones
-      
-      const list = document.getElementById('docentes-list');
-      const row=document.createElement('div');
-      row.className='docente-row';
-      row.innerHTML='<textarea class="docente-item" placeholder="Nombre del docente"></textarea><div class="print-field docente-print" style="display:none"></div><button type="button" class="del-doc" title="Eliminar docente">×</button>';
-      list.appendChild(row);
-      const ta=row.querySelector('textarea'); 
-      autoResize(ta); 
-      ta.focus();
-      syncDocentesToHidden();
-      return;
-    }
-    
-    // Manejar eliminar docente
-    const delBtn = evt.target.closest('.del-doc');
-    if(delBtn && list.contains(delBtn)){
-      const row = delBtn.closest('.docente-row');
-      if(row){
-        if(list.querySelectorAll('.docente-row').length > 1){ 
-          row.remove(); 
-        } else { 
-          row.querySelector('.docente-item').value=''; 
-        }
-        syncDocentesToHidden();
-      }
-    }
-  });
-  
-  docenteEventInitialized = true;
-}
-
-// ======= MEJORA: Sincronizar docentes del encabezado con firmas =======
-function syncDocentesToFirmas() {
-  const docentesEncabezado = document.querySelectorAll('#docentes-list .docente-item');
-  const firmasContainer = document.getElementById('docentes-firmas-list');
-  
-  // Limpiar firmas existentes (excepto coordinador)
-  const coordinadorRow = firmasContainer.querySelector('.coordinador-firma-row');
-  firmasContainer.innerHTML = '';
-  
-  // Crear filas de firma para cada docente
-  docentesEncabezado.forEach((docente, index) => {
-    const nombre = docente.value.trim() || `Docente ${index + 1}`;
-    const firmaRow = crearFilaDocente(nombre);
-    firmasContainer.appendChild(firmaRow);
-  });
-  
-  // Agregar coordinador (mantener el existente o crear nuevo)
-  if (coordinadorRow) {
-    firmasContainer.appendChild(coordinadorRow);
-  } else {
-    const nuevoCoordinadorRow = crearFilaCoordinador();
-    firmasContainer.appendChild(nuevoCoordinadorRow);
-  }
-  
-  actualizarFirmasFinales();
-}
-
-// ======= MEJORA: Gestión de firmas de docentes =======
-function initFirmasDocentes() {
-  // Event listeners para cambios en firmas
-  document.addEventListener('change', (e) => {
-    if (e.target.classList.contains('firma-docente')) {
-      manejarCargaFirma(e.target);
-    }
-  });
-  
-  document.addEventListener('input', (e) => {
-    if (e.target.classList.contains('docente-firma-item')) {
-      actualizarFirmasFinales();
-    }
-  });
-  
-  // Inicializar con docentes del encabezado
-  syncDocentesToFirmas();
-}
-
-// Crear nueva fila de docente
-function crearFilaDocente(nombre = '') {
-  const div = document.createElement('div');
-  div.className = 'docente-firma-row';
-  div.innerHTML = `
-    <input type="file" accept="image/*" class="firma-docente" title="Subir firma" />
-    <img class="firma-preview" alt="Firma" style="display:none;" />
-    <div class="docente-firma-item">${nombre}</div>
-  `;
-  return div;
-}
-
-// Crear fila de coordinador
-function crearFilaCoordinador() {
-  const div = document.createElement('div');
-  div.className = 'coordinador-firma-row';
-  div.innerHTML = `
-    <input type="file" accept="image/*" class="firma-docente" title="Subir firma del coordinador" />
-    <img class="firma-preview" alt="Firma Coordinador" style="display:none;" />
-    <div class="coordinador-firma-item" id="nombre-coordinador">M. Sc. Julio César López De León</div>
-    <div class="vobo-text">Vo. Bo. Coordinador de la carrera</div>
-  `;
-  return div;
-}
-
-// Manejar carga de imagen de firma
-function manejarCargaFirma(input) {
-  const file = input.files[0];
-  if (!file) return;
-  
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    const preview = input.closest('.docente-firma-row, .coordinador-firma-row').querySelector('.firma-preview');
-    preview.src = ev.target.result;
-    preview.style.display = 'block';
-    actualizarFirmasFinales();
-  };
-  reader.readAsDataURL(file);
-}
-
-// MEJORA: Actualizar firmas finales de forma simplificada
-function actualizarFirmasFinales() {
-  // Esta función se mantiene para compatibilidad pero ya no es necesaria
-  // ya que las firmas se muestran directamente en la misma sección
-}
-
-// ======= MEJORA: Asignar coordinador según carrera =======
-function asignarCoordinador(carrera) {
-  const nombreElem = document.getElementById('nombre-coordinador');
-  let nombre = '';
-  
-  switch (carrera) {
-    case 'Contaduría Pública y Auditoría':
-      nombre = 'M. Sc. Mauro Sierra Hengstemberg';
-      break;
-    case 'Administración de Empresas':
-      nombre = 'Dr. Walter Alfredo Santizo López';
-      break;
-    case 'Economía':
-      nombre = 'M. Sc. Fernando Rodríguez Ángel';
-      break;
-    case 'Área Común':
-      nombre = 'M. Sc. Luis Fernando Aguilar Alvarado';
-      break;
-    default:
-      nombre = 'Coordinador Asignado';
-  }
-  
-  if (nombreElem) {
-    nombreElem.textContent = nombre;
-  }
-  
-  // Sincronizar para PDF
-  syncPrintFields();
-}
-
-// ======= Filas de sesiones - MODIFICADA PARA AGREGAR CAMPOS DE IMPRESIÓN =======
-function createSessionRow(idx, session, modality, modClass){
-  return `
-    <tr class="${modClass}">
-      <td>${session}</td>
-      <td>${modality}</td>
-      <td class="description-cell"><textarea aria-label="Descripción ${session} ${idx}" oninput="autoResize(this)"></textarea></td>
-      <td>
-        <input type="number" min="0" step="any" class="short-input minutos" aria-label="Minutos ${session} ${idx}" />
-        <div class="print-minutos" style="display:none"></div>
-      </td>
-      <td>
-        <input type="number" min="0" step="any" class="short-input puntos-netos" aria-label="Puntos netos ${session} ${idx}" />
-        <div class="print-puntos-netos" style="display:none"></div>
-      </td>
-      <td>
-        <input type="number" class="short-input puntos-acumulados" readonly aria-label="Puntos acumulados ${session} ${idx}" />
-        <div class="print-puntos-acumulados" style="display:none"></div>
-      </td>
-    </tr>`;
-}
-
-// ======= Crear semana (MODIFICADO: Cambiado de viernes a domingo) =======
-function addWeek(startDateOverride){
-  weekCount++;
-  const container=document.getElementById('weeks-container');
-  const weekDiv=document.createElement('section');
-  weekDiv.className='week';
-  weekDiv.setAttribute('aria-labelledby', `wk-${weekCount}-title`);
-
-  let labelFecha=''; let rangeHTML='';
-  if(startDateOverride instanceof Date){
-    const d=new Date(startDateOverride.getTime());
-    const monday=toMonday(d); const sunday=endOfWeek(monday); // MODIFICADO
-    labelFecha = ` — Inicio: ${formatDMY(d)}`;
-    rangeHTML = `<div class="week-range">Semana del ${formatDMY(monday)} al ${formatDMY(sunday)} (Lunes a Domingo)</div>`; // MODIFICADO
-  }
-
-  weekDiv.innerHTML = `
-    <h2 id="wk-${weekCount}-title">Semana ${weekCount}${labelFecha}</h2>
-    ${rangeHTML}
-    <table aria-label="Tabla de sesiones semana ${weekCount}">
-      <thead>
-        <tr>
-          <th>Sesión</th>
-          <th>Modalidad</th>
-          <th>Descripción</th>
-          <th>Minutos</th>
-          <th>Puntos netos</th>
-          <th>Puntos acumulados</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${['1','2','3'].map((s, i)=>`
-          ${createSessionRow(i+1, 'Sesión '+s, 'Presencial teórico/ virtual/sincrónico', 'mod-teo')}
-          ${createSessionRow(i+1, 'Sesión '+s, 'Presencial práctico/virtual/sincrónico. Interacción de profesor y estudiante', 'mod-pra')}
-          ${createSessionRow(i+1, 'Sesión '+s, 'No presencial (autónomo)', 'mod-aut')}
-        `).join('')}
-      </tbody>
-    </table>
-    <div class="week-summary" aria-live="polite">
-      <span class="badge" data-week-min>Total minutos: <strong class="val">0</strong></span>
-      <span class="badge" data-week-hrs>Horas: <strong class="val">0.00</strong></span>
-      <span class="badge" data-week-pts>Total puntos: <strong class="val">0.00</strong> <span class="note-muted">(objetivo recomendado ≤ 100)</span></span>
-    </div>`;
-
-  container.appendChild(weekDiv);
-  initAutosize(weekDiv);
-
-  weekDiv.querySelectorAll('.puntos-netos, .minutos').forEach(inp=>{
-    inp.addEventListener('input', ()=>{ computeAll(); });
-    inp.addEventListener('change', ()=>{ computeAll(); });
-  });
-
-  computeAll();
-}
-
-// ======= Etiquetar última semana como examen =======
-function tagExamWeek(){
-  document.querySelectorAll('.week .exam-badge').forEach(e=>e.remove());
-  const weeks = document.querySelectorAll('#weeks-container .week');
-  if(weeks.length===0) return;
-  const last = weeks[weeks.length-1];
-  const badge = document.createElement('div');
-  badge.className='exam-badge';
-  badge.textContent='Examen final (máx. 30 pts)';
-  last.appendChild(badge);
-}
-
-// ======= Cálculos y EVALUACIÓN - MODIFICADA PARA SINCRONIZAR CAMPOS DE IMPRESIÓN =======
-function computeAll(){
-  let totalMinutes = 0;
-  let totalPuntosAcumulados = 0; // Variable para acumular puntos entre semanas
-  
-  document.querySelectorAll('#weeks-container .minutos').forEach(i=>{ 
-    const v=parseNum(i.value); 
-    if(v>=0) totalMinutes += v; 
-  });
-
-  // Puntos acumulados por semana + totales por semana
-  document.querySelectorAll('#weeks-container .week').forEach(week=>{
-    let runningPts = totalPuntosAcumulados; // Comenzar con el acumulado de semanas anteriores
-    const rows = week.querySelectorAll('.puntos-netos');
-    const acc = week.querySelectorAll('.puntos-acumulados');
-    const printAcc = week.querySelectorAll('.print-puntos-acumulados');
-    
-    rows.forEach((inp, idx)=>{
-      const pts=(parseNum(inp.value)||0); 
-      runningPts += pts; 
-      
-      // Actualizar campos de entrada
-      if(acc[idx]) {
-        acc[idx].value = runningPts.toFixed(2);
-      }
-      
-      // CORRECCIÓN: Actualizar campos de impresión
-      if(printAcc[idx]) {
-        printAcc[idx].textContent = runningPts.toFixed(2);
-      }
-      
-      // CORRECCIÓN: Actualizar campos de minutos y puntos netos para impresión
-      const minutosInput = inp.closest('tr').querySelector('.minutos');
-      const puntosNetosInput = inp;
-      const printMinutos = inp.closest('tr').querySelector('.print-minutos');
-      const printPuntosNetos = inp.closest('tr').querySelector('.print-puntos-netos');
-      
-      if(printMinutos && minutosInput) printMinutos.textContent = minutosInput.value || '0';
-      if(printPuntosNetos) printPuntosNetos.textContent = puntosNetosInput.value || '0';
-    });
-    
-    // Guardar el último valor acumulado para la siguiente semana
-    if (rows.length > 0) {
-      totalPuntosAcumulados = runningPts;
-    }
-    
-    let weekMin = 0; 
-    let weekPts = 0;
-    week.querySelectorAll('.minutos').forEach(inp=>{ 
-      const m=(parseNum(inp.value)||0); 
-      weekMin += m; 
-    });
-    week.querySelectorAll('.puntos-netos').forEach(inp=>{ 
-      const p=(parseNum(inp.value)||0); 
-      weekPts += p; 
-    });
-    
-    const weekHrs = weekMin/60;
-    const badgeMin = week.querySelector('[data-week-min] .val'); 
-    if(badgeMin) badgeMin.textContent = String(Math.round(weekMin));
-    const badgeHrs = week.querySelector('[data-week-hrs] .val'); 
-    if(badgeHrs) badgeHrs.textContent = weekHrs.toFixed(2);
-    const badgePts = week.querySelector('[data-week-pts]'); 
-    if(badgePts){ 
-      const val=badgePts.querySelector('.val'); 
-      if(val) val.textContent = weekPts.toFixed(2); 
-      badgePts.classList.toggle('warn', weekPts>100); 
-    }
-  });
-
-  const totalHours = totalMinutes / 60; 
-  const clarTotal = totalHours / CLAR_DIVISOR;
-  const result = document.getElementById('validation-result');
-  if(result){ 
-    result.textContent = `CLAR total (Σ horas / ${CLAR_DIVISOR}): ${clarTotal.toFixed(2)}  ·  Horas: ${totalHours.toFixed(2)}  ·  Minutos: ${totalMinutes.toFixed(0)}`; 
-  }
-
-  tagExamWeek();
-  computeEvaluationSection();
-  computeSummaryReport();
-}
-
-function computeEvaluationSection(){
-  const weeks = Array.from(document.querySelectorAll('#weeks-container .week'));
-  let procesoNet = 0;
-  let examenNet = 0;
-  weeks.forEach((week, i)=>{
-    let sum = 0;
-    week.querySelectorAll('.puntos-netos').forEach(inp=>{ sum += parseNum(inp.value)||0; });
-    if(i === weeks.length-1){ examenNet = sum; } else { procesoNet += sum; }
-  });
-
-  const procesoRaw = procesoNet;
-  const examenRaw = examenNet;
-  const procesoPts = Math.min(70, procesoRaw);
-  const examenPts  = Math.min(30, examenRaw);
-  const total = procesoPts + examenPts;
-
-  // Alertas al cruzar el límite
-  if(procesoRaw > 70 && !warnedProceso){ warnedProceso = true; alert('⚠️ La PONDERACIÓN DEL PROCESO DE APRENDIZAJE supera los 70 puntos (semanas 1 a N-1).'); }
-  if(procesoRaw <= 70 && warnedProceso){ warnedProceso = false; }
-  if(examenRaw > 30 && !warnedExamen){ warnedExamen = true; alert('⚠️ El EXAMEN FINAL supera los 30 puntos (última semana).'); }
-  if(examenRaw <= 30 && warnedExamen){ warnedExamen = false; }
-
-  const html = `
-    <div class="eval-title">EVALUACIÓN</div>
-    <table class="eval-table">
-      <thead>
-        <tr class="eval-head">
-          <th>Concepto</th>
-          <th>Puntos</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="${procesoRaw>70?'over-cap':''}">
-          <td>Ponderación del proceso de aprendizaje (semanas 1 a N-1, máx. 70)</td>
-          <td>${procesoPts.toFixed(2)}${procesoRaw>70?'*':''}</td>
-        </tr>
-        <tr class="${examenRaw>30?'over-cap':''}">
-          <td>Examen final (suma de la última semana, máx. 30)</td>
-          <td>${examenPts.toFixed(2)}${examenRaw>30?'*':''}</td>
-        </tr>
-        <tr class="eval-total">
-          <td>Total acumulado</td>
-          <td>${total.toFixed(2)}</td>
-        </tr>
-      </tbody>
-    </table>
-    ${(procesoRaw>70||examenRaw>30)?'<div class="final-note">* El valor mostrado fue recortado al máximo permitido.</div>':''}`;
-
-  const mount=document.getElementById('evaluation-section');
-  if(mount) mount.innerHTML = html;
-}
-
-// ======= Reporte final =======
-function computeSummaryReport(){
-  const sumBy = { teo:0, pra:0, aut:0 };
-  document.querySelectorAll('#weeks-container .minutos').forEach(inp=>{
-    const val=parseNum(inp.value); const v=Number.isFinite(val)?val:0; const tr=inp.closest('tr'); if(!tr) return;
-    if(tr.classList.contains('mod-teo')) sumBy.teo += v;
-    else if(tr.classList.contains('mod-pra')) sumBy.pra += v;
-    else if(tr.classList.contains('mod-aut')) sumBy.aut += v;
-  });
-  const hours = { teo:sumBy.teo/60, pra:sumBy.pra/60, aut:sumBy.aut/60 };
-  const totals = {
-    min: sumBy.teo + sumBy.pra + sumBy.aut,
-    hrs: (sumBy.teo + sumBy.pra + sumBy.aut)/60,
-    clar: ((sumBy.teo + sumBy.pra + sumBy.aut)/60) / CLAR_DIVISOR,
-  };
-  const fmt = (n,d=2)=> Number.isFinite(n) ? n.toFixed(d) : '0.00';
-
-  const clarField = document.querySelector('.master-header [data-field="clar_credit"]');
-  if(clarField) clarField.value = totals.clar.toFixed(2);
-
-  const html = `
-    <div class="report-title">REPORTE FINAL</div>
-    <table class="report-table">
-      <thead>
-        <tr class="report-head">
-          <th>TIPO DE TRABAJO</th>
-          <th>Minutos por Semestre</th>
-          <th>Horas por Semestre (min/60)</th>
-          <th>CLAR</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="row-teo">
-          <td>Presencial teórico/ virtual/sincrónico</td>
-          <td>${fmt(sumBy.teo,0)}</td>
-          <td>${fmt(hours.teo,2)}</td>
-          <td class="clar-merged" rowspan="4">${totals.clar.toFixed(2)}</td>
-        </tr>
-        <tr class="row-pra">
-          <td>Presencial práctico/virtual/sincrónico. Interacción de profesor y estudiante</td>
-          <td>${fmt(sumBy.pra,0)}</td>
-          <td>${fmt(hours.pra,2)}</td>
-        </tr>
-        <tr class="row-aut">
-          <td><strong>Autónomo</strong></td>
-          <td>${fmt(sumBy.aut,0)}</td>
-          <td>${fmt(hours.aut,2)}</td>
-        </tr>
-        <tr class="row-total">
-          <td><strong>Total</strong></td>
-          <td><strong>${fmt(totals.min,0)}</strong></td>
-          <td><strong>${fmt(totals.hrs,2)}</strong></td>
-        </tr>
-      </tbody>
-    </table>`;
-  const mount=document.getElementById('summary-report');
-  if(mount) mount.innerHTML = html;
-}
-
-// ======= MEJORA: Persistencia mejorada con datos de formulario independientes =======
-function collectCurrentState(){
-  const state={
-    controls:{ 
-      weeks: parseInt(document.getElementById('weeks-count').value||'0',10), 
-      start: document.getElementById('weeks-start').value||'', 
-      snap: !!document.getElementById('weeks-snap').checked 
-    },
-    logos:{ 
-      univ: '', 
-      carrera: '' 
-    },
-    weeks:[],
-    docente: document.getElementById('fld-docente')?.value||'',
-    reglamento: document.getElementById('eval-reglamento')?.value||'',
-    biblio: document.getElementById('biblio-egrafia')?.value||'',
-    // NUEVO: Recoger todos los datos del formulario
-    formData: {},
-    // NUEVO: Recoger firmas
-    firmas: {
-      docentes: [],
-      coordinador: ''
-    }
-  };
-
-  // Recoger todos los campos del formulario
-  const formFields = document.querySelectorAll('.master-header [data-field]');
-  formFields.forEach(field => {
-    const fieldName = field.getAttribute('data-field');
-    if (fieldName) {
-      if (field.tagName === 'SELECT') {
-        state.formData[fieldName] = field.options[field.selectedIndex].text;
-      } else {
-        state.formData[fieldName] = field.value;
-      }
-    }
-  });
-
-  // Recoger datos de semanas
-  document.querySelectorAll('#weeks-container .week').forEach(week=>{
-    const rows = Array.from(week.querySelectorAll('tbody tr')).map(tr=>({ 
-      desc: tr.querySelector('textarea')?.value||'', 
-      min: tr.querySelector('input.minutos')?.value||'', 
-      pts: tr.querySelector('input.puntos-netos')?.value||'' 
-    }));
-    state.weeks.push({ rows });
-  });
-
-  // NUEVO: Recoger firmas de docentes
-  const firmasDocentes = document.querySelectorAll('.docente-firma-row');
-  state.firmas.docentes = Array.from(firmasDocentes).map(row => {
-    const preview = row.querySelector('.firma-preview');
-    return {
-      nombre: row.querySelector('.docente-firma-item').textContent,
-      firma: preview.style.display !== 'none' ? preview.src : ''
-    };
-  });
-
-  // NUEVO: Recoger firma del coordinador
-  const coordinadorRow = document.querySelector('.coordinador-firma-row');
-  if (coordinadorRow) {
-    const preview = coordinadorRow.querySelector('.firma-preview');
-    state.firmas.coordinador = {
-      nombre: coordinadorRow.querySelector('.coordinador-firma-item').textContent,
-      firma: preview.style.display !== 'none' ? preview.src : ''
-    };
-  }
-  
-  return state;
-}
-
-// MEJORA: Aplicar estado con datos de formulario independientes
-function applyState(state){
-  if(!state) return;
-  
-  try{
-    document.getElementById('weeks-count').value = state.controls.weeks || 16;
-    document.getElementById('weeks-start').value = state.controls.start || '';
-    document.getElementById('weeks-snap').checked = !!state.controls.snap;
-    generateWeeksFromControls();
-  }catch(e){ console.warn('No se pudo regenerar estructura:', e); }
-  
-  // Aplicar datos del formulario si existen
-  if(state.formData) {
-    Object.keys(state.formData).forEach(fieldName => {
-      const field = document.querySelector(`[data-field="${fieldName}"]`);
-      if (field) {
-        if (field.tagName === 'SELECT') {
-          // Para selects, buscar la opción que coincida con el valor guardado
-          const options = field.options;
-          for (let i = 0; i < options.length; i++) {
-            if (options[i].text === state.formData[fieldName]) {
-              field.selectedIndex = i;
-              break;
-            }
-          }
-        } else {
-          field.value = state.formData[fieldName] || '';
-        }
-      }
-    });
-  }
-  
-  // Aplicar docentes
-  if(state.docente){ 
-    const list = document.getElementById('docentes-list'); 
-    list.innerHTML=''; 
-    state.docente.split(/\\n+/).forEach(n=>{ 
-      const row=document.createElement('div'); 
-      row.className='docente-row'; 
-      row.innerHTML='<textarea class="docente-item" placeholder="Nombre del docente"></textarea><div class="print-field docente-print" style="display:none"></div><button type="button" class="del-doc" title="Eliminar docente">×</button>'; 
-      row.querySelector('textarea').value=n; 
-      list.appendChild(row); 
-    }); 
-    syncDocentesToHidden();
-  }
-  
-  // Aplicar semanas
-  const weeks=document.querySelectorAll('#weeks-container .week');
-  weeks.forEach((weekEl, wi)=>{
-    const w=state.weeks[wi]; if(!w) return;
-    const trs=weekEl.querySelectorAll('tbody tr');
-    w.rows?.forEach((row, ri)=>{
-      const tr=trs[ri]; if(!tr) return;
-      const ta=tr.querySelector('textarea'); if(ta){ ta.value=row.desc||''; autoResize(ta); }
-      const min=tr.querySelector('input.minutos'); if(min){ min.value=row.min||''; }
-      const pts=tr.querySelector('input.puntos-netos'); if(pts){ pts.value=row.pts||''; }
-    });
-  });
-  
-  // NUEVO: Aplicar firmas
-  if (state.firmas) {
-    // Aplicar firmas de docentes
-    if (state.firmas.docentes && state.firmas.docentes.length > 0) {
-      const firmasContainer = document.getElementById('docentes-firmas-list');
-      firmasContainer.innerHTML = '';
-      
-      state.firmas.docentes.forEach(docente => {
-        const firmaRow = crearFilaDocente(docente.nombre);
-        if (docente.firma) {
-          const preview = firmaRow.querySelector('.firma-preview');
-          preview.src = docente.firma;
-          preview.style.display = 'block';
-        }
-        firmasContainer.appendChild(firmaRow);
+    if (clarToggle && clarDropdown) {
+      clarToggle.addEventListener('click', function (event) {
+        event.stopPropagation();
+        const isOpen = clarDropdown.classList.toggle('show');
+        clarToggle.setAttribute('aria-expanded', String(isOpen));
       });
-      
-      // Aplicar firma del coordinador
-      if (state.firmas.coordinador) {
-        const coordinadorRow = crearFilaCoordinador();
-        if (state.firmas.coordinador.firma) {
-          const preview = coordinadorRow.querySelector('.firma-preview');
-          preview.src = state.firmas.coordinador.firma;
-          preview.style.display = 'block';
+
+      document.addEventListener('click', function (event) {
+        if (!clarDropdown.contains(event.target) && event.target !== clarToggle) {
+          clarDropdown.classList.remove('show');
+          clarToggle.setAttribute('aria-expanded', 'false');
         }
-        firmasContainer.appendChild(coordinadorRow);
+      });
+
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+          clarDropdown.classList.remove('show');
+          clarToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    faqItems.forEach(function(item) {
+      const button = item.querySelector('.faq-btn');
+      button.addEventListener('click', function() {
+        item.classList.toggle('open');
+      });
+    });
+
+    window.addEventListener('scroll', function () {
+      if (window.scrollY > 320) {
+        backTop.classList.add('show');
+      } else {
+        backTop.classList.remove('show');
       }
-    }
-  }
-  
-  // Aplicar reglamento y bibliografía
-  document.getElementById('eval-reglamento').value = state.reglamento||'';
-  document.getElementById('biblio-egrafia').value = state.biblio||'';
-  
-  computeAll();
-  syncPrintFields(); // Sincronizar campos para PDF
-}
-
-// ======= Exportación - MODIFICADA PARA SINCRONIZAR ANTES DE PDF =======
-function prepareForPrint() {
-  syncPrintFields(); // Asegurar que todos los campos estén sincronizados
-  computeAll(); // Asegurar que todos los cálculos estén actualizados
-}
-
-function exportPDF(){ 
-  prepareForPrint();
-  window.print(); 
-}
-
-function downloadBlob(filename, mime, content){ 
-  const blob=new Blob([content], {type:mime}); 
-  const url=URL.createObjectURL(blob); 
-  const a=document.createElement('a'); 
-  a.href=url; 
-  a.download=filename; 
-  a.click(); 
-  URL.revokeObjectURL(url); 
-}
-
-function exportExcel(){ 
-  downloadBlob('instrumento_clar.xls', 'application/vnd.ms-excel', buildExportHTML()); 
-}
-
-function exportWord(){ 
-  prepareForPrint();
-  const content = `
-<html xmlns:o='urn:schemas-microsoft-com:office:office' 
-      xmlns:w='urn:schemas-microsoft-com:office:word' 
-      xmlns='http://www.w3.org/1999/xhtml'>
-<head>
-<meta charset="utf-8">
-<title>INSTRUMENTO CLAR</title>
-<!--[if gte mso 9]>
-<xml>
-<w:WordDocument>
-<w:View>Print</w:View>
-<w:Zoom>100</w:Zoom>
-<w:DoNotOptimizeForBrowser/>
-</w:WordDocument>
-</xml>
-<![endif]-->
-<style>
-  table { border-collapse: collapse; width: 100%; }
-  th, td { border: 1px solid #000; padding: 4px; }
-  .mod-teo td, .mod-teo { background: #f7c7cf; }
-  .mod-pra td, .mod-pra { background: #cfe0f7; }
-  .mod-aut td, .mod-aut { background: #fff5a8; }
-  .report-head { background: #a7d7a7; font-weight: bold; }
-  .clar-merged { background: #ff8c00; font-weight: bold; font-size: 18pt; text-align: center; }
-  .eval-head { background: #dbeafe; font-weight: bold; }
-  .over-cap { background: #fee2e2; color: #7f1d1d; font-weight: 800; }
-  .week { page-break-after: always; }
-  .print-field { display: block !important; }
-</style>
-</head>
-<body>
-${document.querySelector('.page-header')?.outerHTML || ''}
-${document.querySelector('.master-header')?.outerHTML || ''}
-${document.getElementById('weeks-container')?.innerHTML || ''}
-${document.getElementById('evaluation-section')?.innerHTML || ''}
-${document.getElementById('summary-report')?.innerHTML || ''}
-${document.getElementById('final-sections')?.outerHTML || ''}
-</body>
-</html>`;
-  
-  downloadBlob('instrumento_clar.doc', 'application/msword', content);
-}
-
-function exportCSV(){
-  const rows = [];
-  const header = ['Semana','Fila','Sesión','Modalidad','Descripción','Minutos','Puntos netos','Puntos acumulados'];
-  rows.push(header.join(','));
-  let weekIdx=0;
-  document.querySelectorAll('#weeks-container .week').forEach(week=>{
-    weekIdx++;
-    let running=0; let rowIdx=0;
-    week.querySelectorAll('tbody tr').forEach(tr=>{
-      rowIdx++;
-      const sesion = tr.children[0]?.textContent?.trim()||'';
-      const modalidad = tr.children[1]?.textContent?.trim()||'';
-      const desc = tr.querySelector('textarea')?.value?.replace(/\\n/g,' ')||'';
-      const minutos = tr.querySelector('input.minutos')?.value||'';
-      const pts = parseNum(tr.querySelector('input.puntos-netos')?.value||'')||0; running+=pts;
-      const acc = running.toFixed(2);
-      const line=[weekIdx,rowIdx,`"${sesion}"`,`"${modalidad}"`,`"${desc}"`,minutos,pts,acc];
-      rows.push(line.join(','));
     });
-  });
-  const csv = rows.join('\\n');
-  downloadBlob('instrumento_clar.csv','text/csv;charset=utf-8',csv);
-}
 
-function clearCurrentCourse() {
-  if (!currentCourseId) return;
-  
-  if (confirm('¿Está seguro de limpiar todo el contenido del curso actual?')) {
-    // Restablecer a valores por defecto pero mantener el curso
-    const defaultData = getDefaultCourseData();
-    courses[currentCourseId].data = defaultData;
-    applyState(defaultData);
-    saveCourses();
-  }
-}
-
-function buildExportHTML() {
-  // Función para generar HTML de exportación (simplificada)
-  return document.documentElement.outerHTML;
-}
-
-// ======= Eventos =======
-document.addEventListener('DOMContentLoaded', function(){
-  // Inicializar gestión de cursos
-  initCourseManager();
-  
-  // Inicializar fecha por defecto
-  const today = new Date();
-  const monday = toMonday(today);
-  document.getElementById('weeks-start').valueAsDate = monday;
-  
-  // Inicializar gestión de docentes (solo una vez)
-  initDocentes();
-  
-  // Inicializar gestión de firmas
-  initFirmasDocentes();
-  
-  // Configurar coordinador por defecto
-  const carreraSelect = document.getElementById('fld-carrera');
-  asignarCoordinador(carreraSelect.value);
-  
-  // Event listener para cambio de carrera
-  carreraSelect.addEventListener('change', function() {
-    asignarCoordinador(this.value);
-    syncPrintFields(); // CORRECCIÓN: Sincronizar cuando cambie la carrera
-  });
-  
-  // Sincronizar docentes del encabezado con firmas inicialmente
-  syncDocentesToFirmas();
-  
-  // Sincronizar campos cuando cambien
-  document.querySelectorAll('.master-header input, .master-header select, .master-header textarea').forEach(el => {
-    el.addEventListener('input', function() {
-      syncPrintFields();
+    backTop.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
-    el.addEventListener('change', function() {
-      syncPrintFields();
+
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+
+    revealItems.forEach(function(item) {
+      observer.observe(item);
     });
-  });
-
-  // Event listeners para minutos y puntos para sincronizar automáticamente
-  document.addEventListener('input', function(e) {
-    if (e.target.classList.contains('minutos') || 
-        e.target.classList.contains('puntos-netos') || 
-        e.target.classList.contains('puntos-acumulados')) {
-      // Sincronizar inmediatamente para campos de impresión
-      const input = e.target;
-      const printField = input.closest('td').querySelector('.print-' + input.className);
-      if (printField) {
-        printField.textContent = input.value || '0';
-      }
-    }
-  });
-
-  // Event listeners
-  document.getElementById('create-weeks').addEventListener('click', generateWeeksFromControls);
-  
-  // NUEVO: Event listener para actualizar solo las fechas cuando cambie la fecha de inicio
-  document.getElementById('weeks-start').addEventListener('change', function() {
-    // Solo actualizar fechas si ya existen semanas
-    const existingWeeks = document.querySelectorAll('#weeks-container .week').length;
-    if (existingWeeks > 0) {
-      updateWeekDates();
-    }
-  });
-  
-  document.getElementById('btn-export-pdf').addEventListener('click', exportPDF);
-  document.getElementById('btn-clear').addEventListener('click', ()=>{ if(confirm('Esto borrará el contenido del curso actual. ¿Continuar?')){ clearCurrentCourse(); } });
-
-  // Event listener para firma del coordinador
-  document.addEventListener('change', function(e) {
-    if (e.target.classList.contains('firma-docente')) {
-      const file = e.target.files[0];
-      if (!file) return;
-      
-      const reader = new FileReader();
-      reader.onload = function(ev) {
-        const preview = e.target.closest('.docente-firma-row, .coordinador-firma-row').querySelector('.firma-preview');
-        preview.src = ev.target.result;
-        preview.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-
-  // Auto-guardado cuando se modifiquen datos
-  document.addEventListener('input', () => {
-    if (currentCourseId) {
-      // Guardar automáticamente después de un delay
-      clearTimeout(window.autoSaveTimeout);
-      window.autoSaveTimeout = setTimeout(() => {
-        saveCurrentCourse();
-      }, 2000);
-    }
-  });
-
-  computeAll(); 
-  initAutosize(document);
-  syncPrintFields(); // Sincronizar campos inicialmente
-});
-</script>
+  </script>
 </body>
 </html>
